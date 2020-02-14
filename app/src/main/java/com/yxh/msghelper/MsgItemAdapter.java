@@ -61,8 +61,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
                 Context context = MsgApp.getContext();
                 Intent in1=new Intent(context, MsgBodyDiagActivity.class);
                 in1.putExtra("msg_item", item);
-                in1.putExtra("mode", "abstract");
-                //in1.putExtra("mode", "detail");
+                //in1.putExtra("mode", "abstract");
+                in1.putExtra("mode", "detail");
                 context.startActivity(in1);
                 //Toast.makeText(view.getContext(), "你点击了TextView(body)"+ item.getBody(), Toast.LENGTH_SHORT).show();
             }
