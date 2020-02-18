@@ -23,7 +23,7 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         //this.getWindow().setAttributes(params);
 
         MsgItem msgItem = (MsgItem)getIntent().getSerializableExtra("msg_item");
-        TextView textBody = (TextView) findViewById(R.id.text_body_full);
+        TextView textBody = findViewById(R.id.text_body_full);
         textBody.setText(msgItem.getBody());
         textBody.setMovementMethod(ScrollingMovementMethod.getInstance());
 
@@ -46,7 +46,7 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
                     .append(", mtu=" + msgItem.getMtu())
                     .append(", protocol=" + msgItem.getProtocol());
         }
-        TextView textHead = (TextView) findViewById(R.id.text_header);
+        TextView textHead = findViewById(R.id.text_header);
         textHead.setText(sb.toString());
     }
 }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World888!" />
+
+    <Button
+        android:id="@+id/button_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="测试Toast"
+        />
+
+    <Button
+        android:id="@+id/button_finish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="结束当前activity"
+        />
+    <Button
+        android:id="@+id/btn_send_broadcast_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="发送自定义广播(给动态接收器)"
+        />
+
+    <Button
+        android:id="@+id/btn_send_broadcast_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="发送自定义广播(给静态接收器)"
+        />
+    <Button
+        android:id="@+id/btn_svc_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="start service"
+        />
+    <Button
+        android:id="@+id/btn_svc_stop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="stop service"
+        />
+    <Button
+        android:id="@+id/btn_svc_bind"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="bind service"
+        />
+    <Button
+        android:id="@+id/btn_svc_unbind"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="unbind service"
+        />
+</LinearLayout>

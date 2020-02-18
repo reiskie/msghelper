@@ -43,16 +43,22 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     });
 
     @Override
+    protected void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        //outState.putString("","");
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_msg_group);
 
-        Button button3 = (Button) findViewById(R.id.button_3);
+        Button button3 = findViewById(R.id.btn_try);
         button3.setOnClickListener(this);
-        Button button_list = (Button) findViewById(R.id.button_list);
+        Button button_list = findViewById(R.id.button_list);
         button_list.setOnClickListener(this);
 
-        mTextView1 = (TextView) findViewById(R.id.text_1);
+        mTextView1 = findViewById(R.id.text_1);
         mEditText1 = findViewById(R.id.edittext_1);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) !=
@@ -92,12 +98,13 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View v){
         switch (v.getId()){
-            case R.id.button_3:
-                finish();
+            case R.id.btn_try:
+                Intent in1=new Intent(this, ActivityTry.class);
+                startActivity(in1);
                 break;
             case R.id.button_list:
-                Intent in1=new Intent(this, MsgListActivity.class);
-                startActivity(in1);
+                Intent in2=new Intent(this, MsgListActivity.class);
+                startActivity(in2);
                 break;
             default:
                 break;

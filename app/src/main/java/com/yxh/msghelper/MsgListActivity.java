@@ -28,9 +28,9 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_msg_list);
-        Button button3 = (Button) findViewById(R.id.button_finish);
+        Button button3 = findViewById(R.id.button_finish);
         button3.setOnClickListener(this);
-        Button buttonread = (Button) findViewById(R.id.button_read);
+        Button buttonread = findViewById(R.id.button_read);
         buttonread.setOnClickListener(this);
 
         initMsgItems();
@@ -46,7 +46,6 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_SMS},1);
         }else{
-            ;
         }
     }
 
@@ -56,7 +55,6 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
         switch (requestCode) {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ;
                 } else {
                     Toast.makeText(this, "您拒绝授予此应用权限，无法完成正常功能",
                             Toast.LENGTH_LONG).show();
@@ -109,7 +107,7 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
                 m1.setSubject(c.getString(c.getColumnIndex("subject")));
                 //m1.setMtu(c.getInt(c.getColumnIndex("mtu")));
                 m1.setProtocol(c.getInt(c.getColumnIndex("protocol")));
-                m1.setRead((0==c.getInt(c.getColumnIndex("read")))?false:true);
+                m1.setRead(0 != c.getInt(c.getColumnIndex("read")));
 
                 itemList.add(m1);
                 if (itemList.size() > 10) break;
