@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,7 +20,7 @@ import android.os.Handler;
 import android.widget.Toast;
 
 public class MsgGroupActivity extends AppCompatActivity implements View.OnClickListener{
-
+    private static final String TAG = "MsgGroupActivity";
     private TextView mTextView1;
     private EditText mEditText1;
     private SMSContentObserver smsContentObserver;
@@ -61,6 +62,11 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         mTextView1 = findViewById(R.id.text_1);
         mEditText1 = findViewById(R.id.edittext_1);
 
+        String howtostart=getIntent().getStringExtra("howtostart");
+        Log.e(TAG,"howtostart="+howtostart);
+        mTextView1.setText(howtostart);
+
+        // for content observer
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) !=
         PackageManager.PERMISSION_GRANTED)
         {
@@ -69,6 +75,31 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         }else{
             registerContentObservers();
         }
+
+        // for broadcast receiver
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) !=
+                PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECEIVE_SMS},2);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED) !=
+                PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECEIVE_BOOT_COMPLETED},3);
+        }
+
+        if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) !=
+                    PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.FOREGROUND_SERVICE},4);
+            }
+        }
+
     }
 
     @Override
@@ -78,7 +109,31 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     registerContentObservers();
                 } else {
-                    Toast.makeText(this, "您拒绝授予此应用权限，无法完成正常功能",
+                    Toast.makeText(this, "您拒绝授予读取短信权限，无法完成正常功能!",
+                            Toast.LENGTH_LONG).show();
+                }
+                break;
+            case 2:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    registerContentObservers();
+                } else {
+                    Toast.makeText(this, "您拒绝授予接收短信权限，无法完成正常功能!",
+                            Toast.LENGTH_LONG).show();
+                }
+                break;
+            case 3:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    registerContentObservers();
+                } else {
+                    Toast.makeText(this, "您拒绝授予开机启动权限，无法完成正常功能!",
+                            Toast.LENGTH_LONG).show();
+                }
+                break;
+            case 4:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    registerContentObservers();
+                } else {
+                    Toast.makeText(this, "您拒绝授予前台服务权限，无法完成正常功能!",
                             Toast.LENGTH_LONG).show();
                 }
                 break;

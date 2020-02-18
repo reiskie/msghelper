@@ -43,7 +43,8 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_try);
 
-        // try 动态注册receiver for SMS, not work，短信来时，无法收到广播
+        // try 动态注册receiver for SMS, not work，短信来时，无法收到广播（02-16）
+        //                              work. 在主活动添加运行时权限RECEIVE_SMS后 (02-18)
         // try 动态注册receiver for 自定义广播，work
         // try 动态注册receiver for 飞行模式，work
         IntentFilter interFilter = new IntentFilter();
@@ -71,16 +72,7 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
         findViewById(R.id.btn_svc_bind).setOnClickListener(this);
         findViewById(R.id.btn_svc_unbind).setOnClickListener(this);
 
-        if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P){
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) !=
-                    PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.FOREGROUND_SERVICE},1);
-            }else{
 
-            }
-        }
 
     }
 
@@ -168,17 +160,17 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
     class ReceiverDyn extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(TAG,"ReceiverDyn:onReceiver: intent.getAction()="+intent.getAction());
+            Log.i(TAG,"ReceiverDyn:onReceive: intent.getAction()="+intent.getAction());
             Toast.makeText(context,
                     "ReceiverDyn:onReceive intent.getAction()="+intent.getAction(),
                     Toast.LENGTH_LONG).show();
 
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
-                Log.e(TAG, "飞行模式状态 1为开启状态，0为关闭状态 airState=="
+                Log.e(TAG, "ReceiverDyn:飞行模式状态 1为开启状态，0为关闭状态 airState=="
                         + bundle.getBoolean("state"));
             }else{
-                Log.e(TAG, "bundle is null");
+                Log.e(TAG, "ReceiverDyn:bundle is null");
             }
 
             //abortBroadcast(); // 截断有序广播

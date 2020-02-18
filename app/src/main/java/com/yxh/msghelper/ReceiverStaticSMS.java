@@ -18,7 +18,8 @@ public class ReceiverStaticSMS extends BroadcastReceiver {
         // an Intent broadcast.
         //throw new UnsupportedOperationException("Not yet implemented");
 
-        // not work，来短信时，收不到广播
+        // 02-16, not work，来短信时，收不到广播
+        // 02-18, 在主活动添加运行时权限RECEIVE_SMS后， it work
         Log.i(TAG, "onReceive: executed.");
         Toast.makeText(context, "ReceiverStaticSMS:onReceive executed.", Toast.LENGTH_LONG).show();
 
@@ -26,6 +27,8 @@ public class ReceiverStaticSMS extends BroadcastReceiver {
         // pdu是短信的基本承载单元，短信要求长度，超过长度则被分为许多个pdu
         Object[] objects = (Object[]) bundle.get("pdus");
 
+        // 下面读取当前广播对应的一条短信
+        // 长短信需要循环多次才能读取完整
         for (Object object:objects){
             SmsMessage message = SmsMessage.createFromPdu((byte[]) object);
             // 发信人号码
