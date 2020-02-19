@@ -3,6 +3,8 @@ package com.yxh.msghelper;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
+// refer to class Telephony.Sms.Inbox
+// to read message from content://sms/inbox
 public class MsgItem implements Serializable {
     //
     private int _id;
@@ -13,7 +15,7 @@ public class MsgItem implements Serializable {
     private long date_sent;
     private boolean read; // 0未读， 1已读
     private boolean seen; // 和通知有关
-    private int status;
+    private int status;  //TP-Status value for the message, or -1 if no status has been received
     private String subject;
     private String body;
     private int Person;  // reference to item in {@code content://contacts/people}

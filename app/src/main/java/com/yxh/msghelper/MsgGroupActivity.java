@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,8 @@ import android.net.Uri;
 import android.os.Message;
 import android.os.Handler;
 import android.widget.Toast;
+
+import org.litepal.LitePal;
 
 public class MsgGroupActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "MsgGroupActivity";
@@ -65,6 +68,9 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         String howtostart=getIntent().getStringExtra("howtostart");
         Log.e(TAG,"howtostart="+howtostart);
         mTextView1.setText(howtostart);
+
+        SQLiteDatabase db = LitePal.getDatabase();
+        // 创建索引
 
         // for content observer
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) !=
