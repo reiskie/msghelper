@@ -72,4 +72,32 @@
             android:layout_weight="1"
             android:text="unbind service" />
     </LinearLayout>
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btn_clear_sms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="清空SMS表" />
+
+        <Button
+            android:id="@+id/btn_save_sms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="将短信存入SMS表" />
+
+        <Button
+            android:id="@+id/btn_read_sms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="读取SMS表" />
+    </LinearLayout>
+
 </LinearLayout>

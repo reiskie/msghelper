@@ -71,7 +71,9 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
         findViewById(R.id.btn_svc_stop).setOnClickListener(this);
         findViewById(R.id.btn_svc_bind).setOnClickListener(this);
         findViewById(R.id.btn_svc_unbind).setOnClickListener(this);
-
+        findViewById(R.id.btn_clear_sms).setOnClickListener(this);
+        findViewById(R.id.btn_save_sms).setOnClickListener(this);
+        findViewById(R.id.btn_read_sms).setOnClickListener(this);
 
 
     }
@@ -131,6 +133,18 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
                     isBinded = false;
                 }
 
+                break;
+            case R.id.btn_clear_sms:
+                Log.i(TAG,"onClick:clear_sms " );
+                new DataAccess().clearMSGFromDB();
+                break;
+            case R.id.btn_save_sms:
+                Log.i(TAG,"onClick:save_sms " );
+                new DataAccess().getInboxSMSAndSaveToDB();
+                break;
+            case R.id.btn_read_sms:
+                Log.i(TAG,"onClick:read_sms" );
+                new DataAccess().getMsgfromDB();
                 break;
             default:
                 break;
