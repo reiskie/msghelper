@@ -8,10 +8,25 @@ import org.litepal.LitePal;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class DataAccess {
     private static final String TAG = "DataAccess";
+
+
+    //String predicate;
+    //String[] predicate_args;
+
+    // for detail
+    String order_col;
+    int limit;
+    int offset;
+    // List<SMS> result_set;
+
+    // for aggregation
+    String aggregate_col;
+    // Map<String, Integer> result_count;
 
 
 
@@ -74,23 +89,36 @@ public class DataAccess {
         return zero;
     }
 
-    public List<SMS> getMsgfromDB(){
+    // use LitePal
+    // E.g.@github
+    // List<Song> songs = LitePal.where("name like ? and duration < ?", "song%", "200").order("duration").find(Song.class);
+    // 注意: where方法的参数是(String... conditions), 不支持用String[]数组表示条件中用到的多个值.
+    public List<SMS> getMsgfromDB(String order_col, int limit, int offset, String... conditions ){
 
-        List<SMS> ls = null;
+        List<SMS> result = null;
 
         //String dateArgs = Long.toString(getStartTimeOfDay());
         String dateArgs = new String("1580916827092");
-        ls = LitePal.select("*")
+        result = LitePal.select("*")
                 .where("date > ?", dateArgs)
                 .order("id")
                 .find(SMS.class);
 
-        Log.i(TAG, "getMsgfromDB: ls.size() = " + ls.size());
+        Log.i(TAG, "getMsgfromDB: ls.size() = " + result.size());
 
-        return ls;
+        return result;
     }
 
-    public void clearMSGFromDB() {
+    // no groupby in LitePal
+    // use SQLiteDatabase.query(), it support selectionArgs[]
+    public Map<String, Integer>  aggregateMsgfromDB(String aggregate_col){
+
+        Map<String, Integer> result = null;
+
+        return result;
+    }
+
+        public void clearMSGFromDB() {
         LitePal.deleteAll(SMS.class);
     }
 
