@@ -25,7 +25,8 @@ import java.util.List;
 public class MsgListActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "MsgListActivity";
 
-    private List<MsgItem> itemList = new ArrayList<>();
+    private List<MsgItem> itemList = null;
+    private DataAccess dataAccess = null;
     private MsgItemAdapter mAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +37,10 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
         Button buttonread = findViewById(R.id.button_read);
         buttonread.setOnClickListener(this);
 
-        initMsgItems();
+        dataAccess =
+                new DataAccess(null, null, null,0,0) ;
+        itemList = dataAccess.getMsgfromDB(true);
+
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager layoutManager= new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -75,100 +79,21 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.button_read:
                 readMsg();
-                readMsgFromInboxToDB();
                 break;
             default:
                 break;
         }
     }
 
-    private void readMsgFromInboxToDB() {
-
-        int last_raw_id = 0;
-        SMS lastSms = LitePal.findLast(SMS.class);
-        if (lastSms != null ){
-            last_raw_id = lastSms.getRaw_id();
-        }
-        Log.i(TAG, "last_raw_id in database: "+last_raw_id);
-        lastSms.initDate();
-        Log.i(TAG, "lastSms.getTime(): "+lastSms.getTime());
-
-        //LitePal.deleteAll(SMS.class);
-
-        Uri inSMSUri = Uri.parse("content://sms/inbox") ;
-        int i=0;
-        int id = 0;
-        Cursor c = this.getContentResolver().query(inSMSUri, null, null, null,"date asc");
-        if(c != null) {
-            Log.i(TAG, "sms count of inbox is " + c.getCount());
-            while (c.moveToNext()) {
-                id = c.getInt(c.getColumnIndex("_id"));
-                Log.i(TAG, "read id=" + id);
-                if(id > last_raw_id) {
-                    SMS sms = new SMS();
-                    sms.setRaw_id(id);
-                    sms.setThread_id(c.getInt(c.getColumnIndex("thread_id")));
-                    sms.setAddress(c.getString(c.getColumnIndex("address")));
-                    sms.setDate(c.getLong(c.getColumnIndex("date")));
-                    sms.setBody(c.getString(c.getColumnIndex("body")));
-                    sms.save();
-                    Log.i(TAG, "insert id=" + id);
-                    i++;
-                }
-                if (i >= 2) break;
-            }
-            c.close();
-        }
-    }
-
     private void readMsg(){
 
-        //查询发件箱里的内容
-        Uri inSMSUri = Uri.parse("content://sms/inbox") ;
-        int i=0;
-        Cursor c = this.getContentResolver().query(inSMSUri, null, null, null,"date desc");
-        if(c != null) {
+        //按当前条件，重读db
+        // itemList重新赋值
+        itemList.clear();
+        itemList = dataAccess.getMsgfromDB(true);
+        mAdapter.notifyDataSetChanged();
 
-            Log.i("xxx", "the number of inbox is " + c.getCount());
-            itemList.clear();
-
-            //循环遍历
-            while (c.moveToNext()) {
-                Log.i("xxx", c.getString(c.getColumnIndex("body")));
-                MsgItem m1 = new MsgItem(
-                        c.getLong(c.getColumnIndex("date")),
-                        c.getString(c.getColumnIndex("address")),
-                        c.getString(c.getColumnIndex("body"))
-                );
-                m1.set_id(c.getInt(c.getColumnIndex("_id")));
-                m1.setThread_id(c.getInt(c.getColumnIndex("thread_id")));
-                m1.setType(c.getInt(c.getColumnIndex("type")));
-                m1.setStatus(c.getInt(c.getColumnIndex("status")));
-                m1.setDate_sent(c.getLong(c.getColumnIndex("date_sent")));
-                m1.setCreator(c.getString(c.getColumnIndex("creator")));
-                m1.setSubject(c.getString(c.getColumnIndex("subject")));
-                //m1.setMtu(c.getInt(c.getColumnIndex("mtu")));
-                m1.setProtocol(c.getInt(c.getColumnIndex("protocol")));
-                m1.setRead(0 != c.getInt(c.getColumnIndex("read")));
-
-                itemList.add(m1);
-                if (itemList.size() > 10) break;
-            }
-            c.close();
-            mAdapter.notifyDataSetChanged();
-
-        }
     }
 
-    private void initMsgItems() {
-        for(int i = 0; i < 1; i++) {
-            MsgItem m1 = new MsgItem(11221, "10086", "火车");
-            itemList.add(m1);
-            MsgItem m2 = new MsgItem(355453, "10010", "飞机");
-            itemList.add(m2);
-            MsgItem m3 = new MsgItem(31233, "10000", "汽车");
-            itemList.add(m3);
-        }
-    }
 
 }

@@ -74,7 +74,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MsgItem item = mMsgItemList.get(position);
-        holder.itemDate.setText(item.getHourmin());
+        item.initDate();
+        holder.itemDate.setText(item.getTime());
         holder.itemAddress.setText(item.getAddress());
         holder.itemTag.setText("TAG");
         holder.itemBody.setText(item.getBody());

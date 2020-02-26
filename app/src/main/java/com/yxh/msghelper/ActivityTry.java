@@ -43,7 +43,7 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_try);
 
-        // try 动态注册receiver for SMS, not work，短信来时，无法收到广播（02-16）
+        // try 动态注册receiver for MsgItem, not work，短信来时，无法收到广播（02-16）
         //                              work. 在主活动添加运行时权限RECEIVE_SMS后 (02-18)
         // try 动态注册receiver for 自定义广播，work
         // try 动态注册receiver for 飞行模式，work
@@ -136,15 +136,18 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
                 break;
             case R.id.btn_clear_sms:
                 Log.i(TAG,"onClick:clear_sms " );
-                new DataAccess().clearMSGFromDB();
+                DataAccess.clearMSGFromDB();
                 break;
             case R.id.btn_save_sms:
                 Log.i(TAG,"onClick:save_sms " );
-                new DataAccess().getInboxSMSAndSaveToDB();
+                DataAccess.copySMSFromInboxToDB();
                 break;
             case R.id.btn_read_sms:
                 Log.i(TAG,"onClick:read_sms" );
-                new DataAccess().getMsgfromDB();
+                DataAccess dataAccess =
+                        new DataAccess(null, null, null,0,0) ;
+                dataAccess.getMsgfromDB(true);
+                dataAccess.aggregateMsgfromDB("address");
                 break;
             default:
                 break;

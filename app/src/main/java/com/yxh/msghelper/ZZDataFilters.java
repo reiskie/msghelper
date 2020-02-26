@@ -3,7 +3,8 @@ package com.yxh.msghelper;
 import java.util.List;
 
 // this is too complicated.
-public class DataFilters {
+// original name: DataFilters
+public class ZZDataFilters {
 
     List<Filter> mFilters;
     List<String> mRelations; // and, or

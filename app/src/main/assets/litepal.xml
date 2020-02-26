@@ -2,9 +2,9 @@
 <litepal>
 
     <dbname value="msghelper" />
-    <version value="3" />
+    <version value="4" />
     <list>
-        <mapping class="com.yxh.msghelper.SMS" />
+        <mapping class="com.yxh.msghelper.MsgItem" />
     </list>
 
     <!--

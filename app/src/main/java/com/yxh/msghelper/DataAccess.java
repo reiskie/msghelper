@@ -6,42 +6,111 @@ import android.util.Log;
 
 import org.litepal.LitePal;
 
-import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
 public class DataAccess {
     private static final String TAG = "DataAccess";
+    String alertLevel;
+    String system;
+    // time 最近多久/当日 > xxxxxx
+    //      指定范围  [xxx, yyy]
+    long upperTime;
+    long lowerTime;
+    String category;
 
 
-    //String predicate;
-    //String[] predicate_args;
+    public DataAccess(String alertLevel, String system, String category, long upperTime, long lowerTime) {
+        this.alertLevel = alertLevel;
+        this.system = system;
+        this.upperTime = upperTime;
+        this.lowerTime = lowerTime;
+        this.category = category; // category value depends on data in db
+    }
 
-    // for detail
-    String order_col;
-    int limit;
-    int offset;
-    // List<SMS> result_set;
+    public String getConditionString(){
 
-    // for aggregation
-    String aggregate_col;
-    // Map<String, Integer> result_count;
+        String str_cond = new String(" 1=1 ");
 
+        if (alertLevel != null){
+            str_cond += " and al_level = '" + alertLevel + "'";
+        }
+        if (system != null){
+            str_cond += " and system = '" + system + "'";
+        }
+        if (category != null){
+            str_cond += " and msg_category = '" + category + "'";
+        }
+        if (lowerTime > 0){
+            str_cond += " and date >= " + lowerTime;
+        }
+        if (upperTime > 0){
+            str_cond += " and date <= " + upperTime;
+        }
 
+        Log.i(TAG,"getConditionString(), str_cond=" + str_cond);
 
-    public int getLastRawIdFromDB() {
+        return str_cond;
+    }
+
+    public String getAlertLevel() {
+        return alertLevel;
+    }
+
+    public void setAlertLevel(String alertLevel) {
+        this.alertLevel = alertLevel;
+    }
+
+    public String getSystem() {
+        return system;
+    }
+
+    public void setSystem(String system) {
+        this.system = system;
+    }
+
+    public long getUpperTime() {
+        return upperTime;
+    }
+
+    public void setUpperTime(long upperTime) {
+        this.upperTime = upperTime;
+    }
+
+    public long getLowerTime() {
+        return lowerTime;
+    }
+
+    public void setLowerTime(long lowerTime) {
+        this.lowerTime = lowerTime;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public static void clearMSGFromDB() {
+        LitePal.deleteAll(MsgItem.class);
+    }
+
+    private static int getLastRawIdFromDB() {
         int last_raw_id = 0;
-        SMS lastSms = LitePal.findLast(SMS.class);
-        if (lastSms != null ){
-            last_raw_id = lastSms.getRaw_id();
+        MsgItem lastMsgItem = LitePal.findLast(MsgItem.class);
+        if (lastMsgItem != null ){
+            last_raw_id = lastMsgItem.getRaw_id();
         }
         Log.i(TAG, "getLastRawIdFromDB: last_raw_id in database: "+last_raw_id);
         return last_raw_id;
     }
 
-
-    public void getInboxSMSAndSaveToDB() {
+    // return 是否有新数据
+    public static boolean copySMSFromInboxToDB() {
 
         int last_raw_id = getLastRawIdFromDB();
 
@@ -56,15 +125,15 @@ public class DataAccess {
         Cursor c = MsgApp.getContext().getContentResolver()
                 .query(inSMSUri, null, sel, selArgs,"date asc");
         if(c != null) {
-            Log.i(TAG, "readMsgFromInboxToDB: sms count by query inbox is " + c.getCount());
+            Log.i(TAG, "copySMSFromInboxToDB: sms count by query inbox is " + c.getCount());
             while (c.moveToNext()) {
-                SMS sms = new SMS();
-                sms.setRaw_id(c.getInt(c.getColumnIndex("_id")));
-                sms.setThread_id(c.getInt(c.getColumnIndex("thread_id")));
-                sms.setAddress(c.getString(c.getColumnIndex("address")));
-                sms.setDate(c.getLong(c.getColumnIndex("date")));
-                sms.setBody(c.getString(c.getColumnIndex("body")));
-                sms.save();
+                MsgItem msgItem = new MsgItem();
+                msgItem.setRaw_id(c.getInt(c.getColumnIndex("_id")));
+                msgItem.setThread_id(c.getInt(c.getColumnIndex("thread_id")));
+                msgItem.setAddress(c.getString(c.getColumnIndex("address")));
+                msgItem.setDate(c.getLong(c.getColumnIndex("date")));
+                msgItem.setBody(c.getString(c.getColumnIndex("body")));
+                msgItem.save();
                 i++;
                 // for test
                 int id = c.getInt(c.getColumnIndex("_id"));
@@ -73,10 +142,14 @@ public class DataAccess {
                 //if (i >= 2) break;
             }
             c.close();
+
+            Log.i(TAG, "inserted count of rows: " + i );
         }
+
+        return true;
     }
 
-    private long getStartTimeOfDay(){
+    private static long getStartTimeOfDay(){
 //        Calendar calendar=Calendar.getInstance();
 //        calendar.setTime(new java.util.Date());
 //        calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -93,33 +166,66 @@ public class DataAccess {
     // E.g.@github
     // List<Song> songs = LitePal.where("name like ? and duration < ?", "song%", "200").order("duration").find(Song.class);
     // 注意: where方法的参数是(String... conditions), 不支持用String[]数组表示条件中用到的多个值.
-    public List<SMS> getMsgfromDB(String order_col, int limit, int offset, String... conditions ){
+    public List<MsgItem> getMsgfromDB(boolean flag ){
+        List<MsgItem> result = null;
 
-        List<SMS> result = null;
+        result = LitePal
+                .where(this.getConditionString())
+                .order("id")
+                .find(MsgItem.class);
+
+        Log.i(TAG, "getMsgfromDB: result.size() = " + result.size());
+        Log.i(TAG, "getMsgfromDB: result = " + result);
+
+        return result;
+    }
+
+    // 读取今天的所有信息
+    public List<MsgItem> getMsgfromDB( ){
+        List<MsgItem> result = null;
 
         //String dateArgs = Long.toString(getStartTimeOfDay());
         String dateArgs = new String("1580916827092");
-        result = LitePal.select("*")
+        result = LitePal
+                //.select("*")  // * 可以不写select
                 .where("date > ?", dateArgs)
                 .order("id")
-                .find(SMS.class);
+                .find(MsgItem.class);
 
-        Log.i(TAG, "getMsgfromDB: ls.size() = " + result.size());
+        Log.i(TAG, "getMsgfromDB: result.size() = " + result.size());
+        Log.i(TAG, "getMsgfromDB: result = " + result);
 
         return result;
     }
 
     // no groupby in LitePal
-    // use SQLiteDatabase.query(), it support selectionArgs[]
+    // SQLiteDatabase.query() support groupBy and selectionArgs[], but still need to use cursor
     public Map<String, Integer>  aggregateMsgfromDB(String aggregate_col){
+        HashMap<String, Integer> result = new HashMap<String, Integer>();
+        Log.i(TAG,"aggregateMsgfromDB(), aggregate_cod=" + aggregate_col);
 
-        Map<String, Integer> result = null;
+        String sqlstr = new String("select ");
+        sqlstr = sqlstr + aggregate_col + ", count(1) from msgitem where " + this.getConditionString()
+                + " group by " + aggregate_col + " order by " + aggregate_col;
+        Log.i(TAG,"aggregateMsgfromDB(), sqlstr=" + sqlstr);
+
+        Cursor c = LitePal.findBySQL(sqlstr);
+        if (c != null){
+            if(c.moveToFirst()) {
+                do {
+                    String col = c.getString(0);
+                    int cnt = c.getInt(1);
+                    result.put(col, cnt);
+                } while (c.moveToNext());
+            }
+            c.close();
+        }
+
+        Log.i(TAG,"aggregateMsgfromDB(), result=" + result);
 
         return result;
     }
 
-        public void clearMSGFromDB() {
-        LitePal.deleteAll(SMS.class);
-    }
+
 
 }

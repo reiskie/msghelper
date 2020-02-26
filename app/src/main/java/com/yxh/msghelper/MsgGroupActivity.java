@@ -175,9 +175,16 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onStop() {
         super.onStop();
+        //if (smsContentObserver != null) {
+        //    getContentResolver().unregisterContentObserver(smsContentObserver);
+        //}
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         if (smsContentObserver != null) {
             getContentResolver().unregisterContentObserver(smsContentObserver);
         }
     }
-
 }
