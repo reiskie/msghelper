@@ -33,7 +33,7 @@ public class DataAccess implements Serializable {
     public DataAccess(){
         // set level to all
         // set system to all
-        this.lowerTime = getStartTimeOfDay();
+        //this.lowerTime = getStartTimeOfDay();
         // set category to 1-aleart
     }
 

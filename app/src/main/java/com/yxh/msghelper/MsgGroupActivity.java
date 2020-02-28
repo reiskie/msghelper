@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Message;
 import android.os.Handler;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
 
 import org.litepal.LitePal;
 
@@ -57,6 +58,8 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_msg_group);
+        Toolbar toolbar=(Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         mDataAccess = new DataAccess();
 

@@ -3,8 +3,8 @@
     package="com.yxh.msghelper"
     android:installLocation="internalOnly">
 
-    <uses-permission android:name="android.permission.READ_SMS" /><!-- for MsgItem content observer-->
-    <uses-permission android:name="android.permission.RECEIVE_SMS" /> <!-- for MsgItem broadcast receiver-->
+    <uses-permission android:name="android.permission.READ_SMS" /> <!-- for MsgItem content observer -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" /> <!-- for MsgItem broadcast receiver -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
@@ -16,6 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <receiver
             android:name=".ReceiverStaticSelfDef"
             android:enabled="true"
@@ -25,12 +26,13 @@
                 <action android:name="android.intent.action.AIRPLANE_MODE" />
             </intent-filter>
         </receiver>
-
-        <!-- about "android.permission.BROADCAST_SMS" in the receiver configuration:
+        <!--
+ about "android.permission.BROADCAST_SMS" in the receiver configuration:
         https://stackoverflow.com/questions/1973071/broadcastreceiver-MSGItem-received
         Without requiring that permission, any app on the device could broadcast
         an intent with the action "android.provider.Telephony.SMS_RECEIVED" and
-        your app would think it came from the system.  -->
+        your app would think it came from the system.
+        -->
         <receiver
             android:name=".ReceiverStaticSMS"
             android:enabled="true"
@@ -46,6 +48,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
@@ -54,6 +57,7 @@
             android:name=".FgService"
             android:enabled="true"
             android:exported="true" />
+
         <activity
             android:name=".ActivityTry"
             android:launchMode="singleTask" />
@@ -69,6 +73,7 @@
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
