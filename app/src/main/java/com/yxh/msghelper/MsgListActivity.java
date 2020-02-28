@@ -37,8 +37,8 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
         Button buttonread = findViewById(R.id.button_read);
         buttonread.setOnClickListener(this);
 
-        dataAccess =
-                new DataAccess(null, null, null,0,0) ;
+        dataAccess = (DataAccess)getIntent().getSerializableExtra("dataAccess");
+
         itemList = dataAccess.getMsgfromDB(true);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);

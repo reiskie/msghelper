@@ -24,6 +24,7 @@ import org.litepal.LitePal;
 
 public class MsgGroupActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "MsgGroupActivity";
+    private DataAccess mDataAccess;
     private TextView mTextView1;
     private EditText mEditText1;
     private SMSContentObserver smsContentObserver;
@@ -56,6 +57,8 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_msg_group);
+
+        mDataAccess = new DataAccess();
 
         Button button3 = findViewById(R.id.btn_try);
         button3.setOnClickListener(this);
@@ -165,6 +168,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.button_list:
                 Intent in2=new Intent(this, MsgListActivity.class);
+                in2.putExtra("dataAccess", mDataAccess);
                 startActivity(in2);
                 break;
             default:

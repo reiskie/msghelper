@@ -36,9 +36,18 @@ public class MsgItem extends LitePalSupport implements Serializable {
     // below are this app's specific fields.
     private boolean is_read;
     private int msg_category; // 0-未知，1-告警，2-工单
+    public static final int CATEGORY_UNKNOWN = 0;
+    public static final int CATEGORY_ALERT = 1;
+    public static final int CATEGORY_WORKSHEET = 2;
+
     private int msg_srouce; // 0-未知，1-patrol, 2-zabbix, 3-alphaOps，4-itoms，5-自动化，iPaas
     private boolean is_cleared; // 告警是否清除
     private int al_level; // 0-未知，1-主要，2-次要，3-警告
+    public static final int ALEVEL_UNKNOWN = 0;
+    public static final int ALEVEL_MAJOR= 1;
+    public static final int ALEVEL_MINOR = 2;
+    public static final int ALEVEL_TRIVIAL = 3;
+
     private String system; // 系统
     @Column(ignore = true)
     private String day;

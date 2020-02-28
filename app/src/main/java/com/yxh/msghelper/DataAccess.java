@@ -6,12 +6,13 @@ import android.util.Log;
 
 import org.litepal.LitePal;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class DataAccess {
+public class DataAccess implements Serializable {
     private static final String TAG = "DataAccess";
     String alertLevel;
     String system;
@@ -21,7 +22,6 @@ public class DataAccess {
     long lowerTime;
     String category;
 
-
     public DataAccess(String alertLevel, String system, String category, long upperTime, long lowerTime) {
         this.alertLevel = alertLevel;
         this.system = system;
@@ -30,7 +30,14 @@ public class DataAccess {
         this.category = category; // category value depends on data in db
     }
 
-    public String getConditionString(){
+    public DataAccess(){
+        // set level to all
+        // set system to all
+        this.lowerTime = getStartTimeOfDay();
+        // set category to 1-aleart
+    }
+
+    private String getPredicateString(){
 
         String str_cond = new String(" 1=1 ");
 
@@ -118,7 +125,7 @@ public class DataAccess {
         String[] selArgs = new String[] {
                 Integer.toString(last_raw_id),
                 //"10016", "1065510198","106559999", "10010", "13810105361"};
-                "xxx", "xxx","xxx", "+8613810745542", "+8613810105361"};
+                "xxx", "xxx","10010", "+8613810745542", "+8613810105361"};
 
         Uri inSMSUri = Uri.parse("content://sms/inbox") ;
         int i=0;
@@ -170,7 +177,7 @@ public class DataAccess {
         List<MsgItem> result = null;
 
         result = LitePal
-                .where(this.getConditionString())
+                .where(this.getPredicateString())
                 .order("id")
                 .find(MsgItem.class);
 
@@ -205,7 +212,7 @@ public class DataAccess {
         Log.i(TAG,"aggregateMsgfromDB(), aggregate_cod=" + aggregate_col);
 
         String sqlstr = new String("select ");
-        sqlstr = sqlstr + aggregate_col + ", count(1) from msgitem where " + this.getConditionString()
+        sqlstr = sqlstr + aggregate_col + ", count(1) from msgitem where " + this.getPredicateString()
                 + " group by " + aggregate_col + " order by " + aggregate_col;
         Log.i(TAG,"aggregateMsgfromDB(), sqlstr=" + sqlstr);
 
