@@ -35,18 +35,18 @@ public class MsgItem extends LitePalSupport implements Serializable {
     private String body;
     // below are this app's specific fields.
     private boolean is_read;
-    private int msg_category; // 0-未知，1-告警，2-工单
-    public static final int CATEGORY_UNKNOWN = 0;
+    private int msg_category; // -1-未知，1-告警，2-工单
+    public static final int CATEGORY_UNKNOWN = -1;
     public static final int CATEGORY_ALERT = 1;
     public static final int CATEGORY_WORKSHEET = 2;
 
-    private int msg_srouce; // 0-未知，1-patrol, 2-zabbix, 3-alphaOps，4-itoms，5-自动化，iPaas
+    private int msg_srouce; // -1-未知，1-patrol, 2-zabbix, 3-alphaOps，4-itoms，5-自动化，iPaas
     private boolean is_cleared; // 告警是否清除
-    private int al_level; // 0-未知，1-主要，2-次要，3-警告
-    public static final int ALEVEL_UNKNOWN = 0;
+    private int al_level; // -1-未知，1-主要，2-次要，3-警告
+    public static final int ALEVEL_UNKNOWN = -1;
     public static final int ALEVEL_MAJOR= 1;
     public static final int ALEVEL_MINOR = 2;
-    public static final int ALEVEL_TRIVIAL = 3;
+    //public static final int ALEVEL_TRIVIAL = 3;
 
     private String system; // 系统
     @Column(ignore = true)
@@ -57,6 +57,34 @@ public class MsgItem extends LitePalSupport implements Serializable {
     private String year;
     @Column(ignore = true)
     private String time;
+
+    public void extractInfo() {
+
+        if (al_level == 0 && body != null){
+            if (body.contains("清除告警")){
+                al_level = -1;
+            }else if(body.contains("警告告警")){
+                al_level = 3;
+            }else if(body.contains("次要告警")){
+                al_level = 2;
+            }else if(body.contains("主要告警")){
+                al_level = 1;
+            }else{
+                al_level = -1;
+            }
+        }
+
+    }
+
+    public void formatDate() {
+        if (day == null)
+        {
+            this.day = new SimpleDateFormat("dd").format(this.date);
+            this.mon = new SimpleDateFormat("MM").format(this.date);
+            this.year = new SimpleDateFormat("yyyy").format(this.date);
+            this.time = new SimpleDateFormat("HH:mm:SS").format(this.date);
+        }
+    }
 
     public int getRaw_id() {
         return raw_id;
@@ -88,13 +116,9 @@ public class MsgItem extends LitePalSupport implements Serializable {
 
     public void setDate(long date) {
         this.date = date;
-    }
-
-    public void initDate() {
-        this.day = new SimpleDateFormat("dd").format(this.date);
-        this.mon = new SimpleDateFormat("MM").format(this.date);
-        this.year = new SimpleDateFormat("yyyy").format(this.date);
-        this.time = new SimpleDateFormat("HH:mm:SS").format(this.date);
+        if (date>0){
+            formatDate();
+        }
     }
 
     public String getBody() {

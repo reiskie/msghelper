@@ -23,11 +23,17 @@ import androidx.appcompat.widget.Toolbar;
 
 import org.litepal.LitePal;
 
+import java.util.Map;
+
 public class MsgGroupActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "MsgGroupActivity";
     private DataAccess mDataAccess;
     private TextView mTextView1;
     private EditText mEditText1;
+    TextView mTextMajor;
+    TextView mTextMinor;
+    TextView mTextTrivial;
+    TextView mTextOther;
     private SMSContentObserver smsContentObserver;
 
     private  Handler mHandler = new Handler(new Handler.Callback() {
@@ -65,11 +71,22 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
 
         Button button3 = findViewById(R.id.btn_try);
         button3.setOnClickListener(this);
+        Button button_refresh = findViewById(R.id.btn_refresh);
+        button_refresh.setOnClickListener(this);
         Button button_list = findViewById(R.id.button_list);
         button_list.setOnClickListener(this);
 
         mTextView1 = findViewById(R.id.text_1);
         mEditText1 = findViewById(R.id.edittext_1);
+        mTextMajor = findViewById(R.id.text_major);
+        mTextMajor.setOnClickListener(this);
+        mTextMinor = findViewById(R.id.text_minor);
+        mTextMinor.setOnClickListener(this);
+        mTextTrivial = findViewById(R.id.text_trivial);
+        mTextTrivial.setOnClickListener(this);
+        mTextOther = findViewById(R.id.text_other);
+        mTextOther.setOnClickListener(this);
+
 
         String howtostart=getIntent().getStringExtra("howtostart");
         Log.e(TAG,"howtostart="+howtostart);
@@ -111,6 +128,9 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                         new String[]{Manifest.permission.FOREGROUND_SERVICE},4);
             }
         }
+
+        DataAccess.copySMSFromInboxToDB();
+        Log.i(TAG,"onCreate:ThreadID = " + Thread.currentThread().getId());
 
     }
 
@@ -155,28 +175,94 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void registerContentObservers(){
-        smsContentObserver = new SMSContentObserver(this, mHandler);
+        //smsContentObserver = new SMSContentObserver(this, mHandler);
         Uri smsUri = Uri.parse("content://sms");
-        getContentResolver().registerContentObserver(smsUri,
-                true, smsContentObserver);
+        //getContentResolver().registerContentObserver(smsUri,
+        //        true, smsContentObserver);
 
     }
 
     @Override
     public void onClick(View v){
+        DataAccess da = null;
         switch (v.getId()){
             case R.id.btn_try:
-                Intent in1=new Intent(this, ActivityTry.class);
-                startActivity(in1);
+                Intent in=new Intent(this, ActivityTry.class);
+                startActivity(in);
+                break;
+            case R.id.btn_refresh:
+                Log.i(TAG,"onClick:refresh sms " );
+                DataAccess.copySMSFromInboxToDB();
+                //mDataAccess.getMsgfromDB(true);
+                refreshGroupLevel(mDataAccess.aggregateMsgfromDB("al_level"));
                 break;
             case R.id.button_list:
+                da = new DataAccess();
+                Intent in1=new Intent(this, MsgListActivity.class);
+                in1.putExtra("dataAccess", da);
+                startActivity(in1);
+                break;
+            case R.id.text_major:
+                da = new DataAccess(mDataAccess);
+                da.setAlertLevel(1);
                 Intent in2=new Intent(this, MsgListActivity.class);
-                in2.putExtra("dataAccess", mDataAccess);
+                in2.putExtra("dataAccess", da);
                 startActivity(in2);
+                break;
+            case R.id.text_minor:
+                da = new DataAccess(mDataAccess);
+                da.setAlertLevel(2);
+                Intent in3=new Intent(this, MsgListActivity.class);
+                in3.putExtra("dataAccess", da);
+                startActivity(in3);
+                break;
+            case R.id.text_trivial:
+                da = new DataAccess(mDataAccess);
+                da.setAlertLevel(3);
+                Intent in4=new Intent(this, MsgListActivity.class);
+                in4.putExtra("dataAccess", da);
+                startActivity(in4);
+                break;
+            case R.id.text_other:
+                da = new DataAccess(mDataAccess);
+                da.setAlertLevel(-1);
+                Intent in5=new Intent(this, MsgListActivity.class);
+                in5.putExtra("dataAccess", da);
+                startActivity(in5);
                 break;
             default:
                 break;
         }
+    }
+
+    protected void refreshGroupLevel(Map<String, Integer> groupMap) {
+
+        int cntMajor = 0;
+        int cntMinor = 0;
+        int cntTrivial = 0;
+        int cntOther = 0;
+
+        for (String key : groupMap.keySet()) {
+            if (key.equals("1")){
+                cntMajor += groupMap.get(key);
+            }else if (key.equals("2")){
+                cntMinor += groupMap.get(key);
+            }else if (key.equals("3")){
+                cntTrivial += groupMap.get(key);
+            }else {
+                cntOther += groupMap.get(key);
+            }
+        }
+        Log.i(TAG,"refreshGroupLevel:cntMajor = " + cntMajor);
+        Log.i(TAG,"refreshGroupLevel:cntMinor = " + cntMinor);
+        Log.i(TAG,"refreshGroupLevel:cntTrivial = " + cntTrivial);
+        Log.i(TAG,"refreshGroupLevel:cntOther = " + cntOther);
+        Log.i(TAG,"refreshGroupLevel:ThreadID = " + Thread.currentThread().getId());
+
+        mTextMajor.setText(Integer.toString(cntMajor));
+        mTextMinor.setText(Integer.toString(cntMinor));
+        mTextTrivial.setText(Integer.toString(cntTrivial));
+        mTextOther.setText(Integer.toString(cntOther));
     }
 
     @Override
@@ -185,6 +271,12 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         //if (smsContentObserver != null) {
         //    getContentResolver().unregisterContentObserver(smsContentObserver);
         //}
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        refreshGroupLevel(mDataAccess.aggregateMsgfromDB("al_level"));
     }
 
     @Override

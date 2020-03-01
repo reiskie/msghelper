@@ -120,7 +120,7 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
             public void run() {
                 try{
                     // re-read the itemList
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
 
                 }catch (InterruptedException e){
                     e.printStackTrace();
@@ -129,10 +129,11 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void run() {
                         List<MsgItem> t = dataAccess.getMsgfromDB(true);
-                        itemList.addAll(t);
+                        //itemList.addAll(t);
                         //itemList.remove(1);
-                        mAdapter.notifyDataSetChanged();
-                        recyclerView.scrollToPosition(itemList.size()-1);
+                        //mAdapter.notifyDataSetChanged();
+                        //recyclerView.scrollToPosition(itemList.size()-1);
+                        recyclerView.scrollToPosition(0);
                         swipeRefresh.setRefreshing(false);
                     }
                 });

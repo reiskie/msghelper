@@ -2,11 +2,14 @@ package com.yxh.msghelper;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import org.litepal.LitePal;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +17,15 @@ import java.util.TimeZone;
 
 public class DataAccess implements Serializable {
     private static final String TAG = "DataAccess";
-    String alertLevel;
+    int alertLevel;
     String system;
     // time 最近多久/当日 > xxxxxx
     //      指定范围  [xxx, yyy]
     long upperTime;
     long lowerTime;
-    String category;
+    int category;
 
-    public DataAccess(String alertLevel, String system, String category, long upperTime, long lowerTime) {
+    public DataAccess(int alertLevel, String system, int category, long upperTime, long lowerTime) {
         this.alertLevel = alertLevel;
         this.system = system;
         this.upperTime = upperTime;
@@ -33,22 +36,31 @@ public class DataAccess implements Serializable {
     public DataAccess(){
         // set level to all
         // set system to all
-        //this.lowerTime = getStartTimeOfDay();
+        this.lowerTime = getDefaultLowerTime();
         // set category to 1-aleart
     }
+
+    public DataAccess(DataAccess da){
+        this.alertLevel = da.alertLevel;
+        this.system = da.system;
+        this.upperTime = da.upperTime;
+        this.lowerTime = da.lowerTime;
+        this.category = da.category;
+    }
+
 
     private String getPredicateString(){
 
         String str_cond = new String(" 1=1 ");
 
-        if (alertLevel != null){
-            str_cond += " and al_level = '" + alertLevel + "'";
+        if (alertLevel != 0){
+            str_cond += " and al_level = " + alertLevel + "";
         }
         if (system != null){
             str_cond += " and system = '" + system + "'";
         }
-        if (category != null){
-            str_cond += " and msg_category = '" + category + "'";
+        if (category != 0){
+            str_cond += " and msg_category = " + category + "";
         }
         if (lowerTime > 0){
             str_cond += " and date >= " + lowerTime;
@@ -62,11 +74,11 @@ public class DataAccess implements Serializable {
         return str_cond;
     }
 
-    public String getAlertLevel() {
+    public int getAlertLevel() {
         return alertLevel;
     }
 
-    public void setAlertLevel(String alertLevel) {
+    public void setAlertLevel(int alertLevel) {
         this.alertLevel = alertLevel;
     }
 
@@ -94,16 +106,46 @@ public class DataAccess implements Serializable {
         this.lowerTime = lowerTime;
     }
 
-    public String getCategory() {
+    public int getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(int category) {
         this.category = category;
     }
 
     public static void clearMSGFromDB() {
         LitePal.deleteAll(MsgItem.class);
+    }
+
+
+    private static long getStartTimeOfDay(){
+//        Calendar calendar=Calendar.getInstance();
+//        calendar.setTime(new java.util.Date());
+//        calendar.set(Calendar.HOUR_OF_DAY, 0);
+//        calendar.set(Calendar.MINUTE, 0);
+//        calendar.set(Calendar.SECOND, 0);
+//        return calendar.getTime().getTime();
+
+        long current = System.currentTimeMillis();
+        long zero = current-(current+ TimeZone.getDefault().getRawOffset())%(1000*3600*24);
+        return zero;
+    }
+
+    private static long getEarlistTimeFromConfig(){
+        //now is 24 hours. it should depend on configuration
+        // if user change this config to a earlier time,
+        //   we should check whether this new time is earlier than the first one in db.
+        //   if so, might want to clear table in db and reload all.
+        long t1 = System.currentTimeMillis() - (1000*3600*24);
+        //long t1 = 100; // for test
+        return t1;
+    }
+
+    private static long getDefaultLowerTime(){
+        long t1 = System.currentTimeMillis() - (1000*3600*24);
+        //long t1 = 100; // for test
+        return t1;
     }
 
     private static int getLastRawIdFromDB() {
@@ -116,21 +158,45 @@ public class DataAccess implements Serializable {
         return last_raw_id;
     }
 
+    private static int getFirstRawIdFromDB() {
+        int first_raw_id = 0;
+        MsgItem lastMsgItem = LitePal.findFirst(MsgItem.class);
+        if (lastMsgItem != null ){
+            first_raw_id = lastMsgItem.getRaw_id();
+        }
+        Log.i(TAG, "getFirstRawIdFromDB: first_raw_id in database: "+first_raw_id);
+        return first_raw_id;
+    }
+
     // return 是否有新数据
     public static boolean copySMSFromInboxToDB() {
 
-        int last_raw_id = getLastRawIdFromDB();
+        StringBuilder sb = new StringBuilder("address in (?,?,?,?,?) ");
+        //String[] arr = {"xxx", "xxx","10010", "+8613810745542", "+8613810105361"};
+        //String[] arr = {"xxx", "xxx","xxx", "+8613810745542", "+8613810105361"};
+        //String[] arr = {"10016", "1065510198","106559999", "10010", "13810105361"};
+        String[] arr = {"106980095568911", "106980095568","xxx", "xxx", "xxx"};
 
-        String sel="_id > ? and address in (?,?,?,?,?)";
-        String[] selArgs = new String[] {
-                Integer.toString(last_raw_id),
-                //"10016", "1065510198","106559999", "10010", "13810105361"};
-                "xxx", "xxx","10010", "+8613810745542", "+8613810105361"};
+        List<String> argsList = new ArrayList<String>(Arrays.asList(arr));
+
+        int last_raw_id = getLastRawIdFromDB();
+        if (last_raw_id == 0){ // empty table
+            sb.append(" and date > ? ");
+            argsList.add(Long.toString(DataAccess.getEarlistTimeFromConfig()));
+        }else{
+            sb.append(" and _id > ?  ");
+            argsList.add(Integer.toString(last_raw_id));
+        }
+
+        String selString = sb.toString();
+        String[] selArgs = argsList.toArray(new String[argsList.size()]);
+        Log.i(TAG, "copySMSFromInboxToDB: sel: "+selString);
+        Log.i(TAG, "copySMSFromInboxToDB: selArgs: "+selArgs);
 
         Uri inSMSUri = Uri.parse("content://sms/inbox") ;
         int i=0;
         Cursor c = MsgApp.getContext().getContentResolver()
-                .query(inSMSUri, null, sel, selArgs,"date asc");
+                .query(inSMSUri, null, selString, selArgs,"date asc");
         if(c != null) {
             Log.i(TAG, "copySMSFromInboxToDB: sms count by query inbox is " + c.getCount());
             while (c.moveToNext()) {
@@ -140,6 +206,7 @@ public class DataAccess implements Serializable {
                 msgItem.setAddress(c.getString(c.getColumnIndex("address")));
                 msgItem.setDate(c.getLong(c.getColumnIndex("date")));
                 msgItem.setBody(c.getString(c.getColumnIndex("body")));
+                msgItem.extractInfo();
                 msgItem.save();
                 i++;
                 // for test
@@ -156,18 +223,6 @@ public class DataAccess implements Serializable {
         return true;
     }
 
-    private static long getStartTimeOfDay(){
-//        Calendar calendar=Calendar.getInstance();
-//        calendar.setTime(new java.util.Date());
-//        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
-//        return calendar.getTime().getTime();
-
-        long current = System.currentTimeMillis();
-        long zero = current-(current+ TimeZone.getDefault().getRawOffset())%(1000*3600*24);
-        return zero;
-    }
 
     // use LitePal
     // E.g.@github

@@ -132,7 +132,6 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
                     unbindService(fgServiceConn);
                     isBinded = false;
                 }
-
                 break;
             case R.id.btn_clear_sms:
                 Log.i(TAG,"onClick:clear_sms " );
@@ -145,7 +144,7 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
             case R.id.btn_read_sms:
                 Log.i(TAG,"onClick:read_sms" );
                 DataAccess dataAccess =
-                        new DataAccess(null, null, null,0,0) ;
+                        new DataAccess(0, null, 0,0,0) ;
                 dataAccess.getMsgfromDB(true);
                 dataAccess.aggregateMsgfromDB("address");
                 break;

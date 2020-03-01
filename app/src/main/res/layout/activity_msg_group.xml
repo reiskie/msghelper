@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
 
     <androidx.appcompat.widget.Toolbar
@@ -19,21 +19,147 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="启动实验界面"
-        />
+        android:visibility="gone" />
+    <Button
+        android:id="@+id/btn_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="刷新短信"
+        android:visibility="visible" />
     <Button
         android:id="@+id/button_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="启动MsgList"
-        />
+        android:text="查看全部" />
+
     <TextView
         android:id="@+id/text_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="pretext!" />
+        android:text="pretext!"
+        android:visibility="gone" />
+
     <EditText
         android:id="@+id/edittext_1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:hint="type something"/>
+        android:layout_height="wrap_content"
+        android:hint="type something"
+        android:lines="10"
+        android:visibility="gone" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        >
+
+        <TextView
+            android:id="@+id/text_major"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/text_major_bg"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_weight="1"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/text_minor"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/text_minor_bg"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_weight="1"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/text_trivial"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/text_trivial_bg"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_weight="1"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/text_other"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/text_other_bg"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_weight="1"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        >
+
+        <TextView
+            android:id="@+id/text_major_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="主要"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/text_minor_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="次要"
+            android:textSize="16sp" />
+        <TextView
+            android:id="@+id/text_trivial_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="警告"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/text_other_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="其他"
+            android:textSize="16sp" />
+    </LinearLayout>
 </LinearLayout>

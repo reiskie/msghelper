@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval"
+    android:useLevel="false" >
+
+    <solid android:color="#B22222" />
+    <stroke
+        android:width="2dp"
+        android:color="#DCDCDC" />
+    <size
+        android:height="25dp"
+        android:width="25dp" />
+
+</shape>
+
+<!-- about shape:
+gradient  颜色渐变
+startcolor 起点颜色
+endcolor 终点颜色
+android:angle 角度 0是从左到右，90是从下到上
+solid  填充
+stroke  描边
+corners  圆角
+padding  内容离边界的距离
+-->
