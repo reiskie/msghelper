@@ -25,6 +25,8 @@ import org.litepal.LitePal;
 
 import java.util.Map;
 
+import q.rorbin.badgeview.QBadgeView;
+
 public class MsgGroupActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "MsgGroupActivity";
     private DataAccess mDataAccess;
@@ -33,6 +35,8 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     TextView mTextMajor;
     TextView mTextMinor;
     TextView mTextTrivial;
+    TextView mTextClear;
+    TextView mTextWorksheet;
     TextView mTextOther;
     private SMSContentObserver smsContentObserver;
 
@@ -84,6 +88,10 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         mTextMinor.setOnClickListener(this);
         mTextTrivial = findViewById(R.id.text_trivial);
         mTextTrivial.setOnClickListener(this);
+        mTextClear = findViewById(R.id.text_clear);
+        mTextClear.setOnClickListener(this);
+        mTextWorksheet = findViewById(R.id.text_worksheet);
+        mTextWorksheet.setOnClickListener(this);
         mTextOther = findViewById(R.id.text_other);
         mTextOther.setOnClickListener(this);
 
@@ -185,72 +193,109 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View v){
         DataAccess da = null;
+        Intent in = null;
         switch (v.getId()){
             case R.id.btn_try:
-                Intent in=new Intent(this, ActivityTry.class);
+                in=new Intent(this, ActivityTry.class);
                 startActivity(in);
                 break;
             case R.id.btn_refresh:
                 Log.i(TAG,"onClick:refresh sms " );
                 DataAccess.copySMSFromInboxToDB();
                 //mDataAccess.getMsgfromDB(true);
-                refreshGroupLevel(mDataAccess.aggregateMsgfromDB("al_level"));
+                refreshFixedGroup();
                 break;
             case R.id.button_list:
                 da = new DataAccess();
-                Intent in1=new Intent(this, MsgListActivity.class);
-                in1.putExtra("dataAccess", da);
-                startActivity(in1);
+                in = new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                startActivity(in);
                 break;
             case R.id.text_major:
                 da = new DataAccess(mDataAccess);
                 da.setAlertLevel(1);
-                Intent in2=new Intent(this, MsgListActivity.class);
-                in2.putExtra("dataAccess", da);
-                startActivity(in2);
+                in = new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                startActivity(in);
                 break;
             case R.id.text_minor:
                 da = new DataAccess(mDataAccess);
                 da.setAlertLevel(2);
-                Intent in3=new Intent(this, MsgListActivity.class);
-                in3.putExtra("dataAccess", da);
-                startActivity(in3);
+                in = new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                startActivity(in);
                 break;
             case R.id.text_trivial:
                 da = new DataAccess(mDataAccess);
                 da.setAlertLevel(3);
-                Intent in4=new Intent(this, MsgListActivity.class);
-                in4.putExtra("dataAccess", da);
-                startActivity(in4);
+                in = new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                startActivity(in);
                 break;
+            case R.id.text_clear:
+                da = new DataAccess(mDataAccess);
+                da.setAlertLevel(4);
+                in=new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                startActivity(in);
+            case R.id.text_worksheet:
+                da = new DataAccess(mDataAccess);
+                da.setCategory(2);
+                in=new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                startActivity(in);
             case R.id.text_other:
                 da = new DataAccess(mDataAccess);
-                da.setAlertLevel(-1);
-                Intent in5=new Intent(this, MsgListActivity.class);
-                in5.putExtra("dataAccess", da);
-                startActivity(in5);
+                da.setCategory(-1);
+                in=new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                startActivity(in);
                 break;
             default:
                 break;
         }
     }
 
-    protected void refreshGroupLevel(Map<String, Integer> groupMap) {
+    protected void refreshFixedGroup() {
+        Map<String, Integer> groupMap = null;
+        DataAccess da = new DataAccess(mDataAccess);
+        groupMap = da.aggregateMsgfromDB("msg_category");
+        int cntOther = 0;
+        int cntWorksheet = 0;
+
+        for (String key : groupMap.keySet()) {
+            if (key.equals("-1")){
+                cntOther     = groupMap.get(key);
+            }else if (key.equals("2")){
+                cntWorksheet = groupMap.get(key);
+            }else{
+                // 1-告警
+                // 0-初始化值，不可能有
+            }
+        }
+
+        da = new DataAccess(mDataAccess);
+        //da.setCategory(1);
+        groupMap = da.aggregateMsgfromDB("al_level");
 
         int cntMajor = 0;
         int cntMinor = 0;
         int cntTrivial = 0;
-        int cntOther = 0;
+        int cntClear = 0;
 
         for (String key : groupMap.keySet()) {
             if (key.equals("1")){
-                cntMajor += groupMap.get(key);
+                cntMajor = groupMap.get(key);
             }else if (key.equals("2")){
-                cntMinor += groupMap.get(key);
+                cntMinor = groupMap.get(key);
             }else if (key.equals("3")){
-                cntTrivial += groupMap.get(key);
-            }else {
-                cntOther += groupMap.get(key);
+                cntTrivial = groupMap.get(key);
+            }else if (key.equals("4")){
+                cntClear = groupMap.get(key);
+            }else{
+                //0 : 初始化值，非告警(cate!=1)时会有
+                //-1: 是告警但未能识别出级别，这种情况提取信息时已经归到category = -1 了
+                // 因此这个分支的数据通过category都能覆盖
             }
         }
         Log.i(TAG,"refreshGroupLevel:cntMajor = " + cntMajor);
@@ -262,7 +307,10 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         mTextMajor.setText(Integer.toString(cntMajor));
         mTextMinor.setText(Integer.toString(cntMinor));
         mTextTrivial.setText(Integer.toString(cntTrivial));
+        mTextClear.setText(Integer.toString(cntClear));
+        mTextWorksheet.setText(Integer.toString(cntWorksheet));
         mTextOther.setText(Integer.toString(cntOther));
+        new QBadgeView(this).bindTarget(mTextMajor).setBadgeNumber(10);
     }
 
     @Override
@@ -276,7 +324,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onStart() {
         super.onStart();
-        refreshGroupLevel(mDataAccess.aggregateMsgfromDB("al_level"));
+        refreshFixedGroup();
     }
 
     @Override

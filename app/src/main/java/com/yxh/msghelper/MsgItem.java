@@ -33,22 +33,19 @@ public class MsgItem extends LitePalSupport implements Serializable {
     //private boolean read; // 系统收件箱中  0未读， 1已读
     //private int status;  //TP-Status value for the message, or -1 if no status has been received
     private String body;
+
     // below are this app's specific fields.
     private boolean is_read;
     private int msg_category; // -1-未知，1-告警，2-工单
-    public static final int CATEGORY_UNKNOWN = -1;
-    public static final int CATEGORY_ALERT = 1;
-    public static final int CATEGORY_WORKSHEET = 2;
-
     private int msg_srouce; // -1-未知，1-patrol, 2-zabbix, 3-alphaOps，4-itoms，5-自动化，iPaas
-    private boolean is_cleared; // 告警是否清除
-    private int al_level; // -1-未知，1-主要，2-次要，3-警告
-    public static final int ALEVEL_UNKNOWN = -1;
-    public static final int ALEVEL_MAJOR= 1;
-    public static final int ALEVEL_MINOR = 2;
-    //public static final int ALEVEL_TRIVIAL = 3;
 
-    private String system; // 系统
+    // category为 "告警" 时的属性
+    private boolean is_cleared; // 告警是否清除
+    private int al_level; // 告警级别: -1-未知，1-主要，2-次要，3-警告，4-清除
+    //private String al_type; // 告警种类: 状态类，性能类，容量类，错误提示类，应用日志监控
+    private String system; // 系统，仅对告警提取system
+    //private String sys_level; // 系统级别，告警内容里有
+
     @Column(ignore = true)
     private String day;
     @Column(ignore = true)
@@ -60,9 +57,27 @@ public class MsgItem extends LitePalSupport implements Serializable {
 
     public void extractInfo() {
 
-        if (al_level == 0 && body != null){
+        if (body == null){
+            return;
+        }
+
+        if (msg_category == 0){
+            // 识别告警更重要，贪婪
+            if(body.contains("告警")) {
+                msg_category = 1;
+            }
+            // 在线提问服务请求工单[QS_ONLINE-...
+            // XBANK事件工单[XBANK_EVENT...
+            else if (body.contains("工单")){
+                msg_category = 2;
+            }else{
+                msg_category = -1;
+            }
+        }
+
+        if (msg_category == 1 && al_level == 0){
             if (body.contains("清除告警")){
-                al_level = -1;
+                al_level = 4;
             }else if(body.contains("警告告警")){
                 al_level = 3;
             }else if(body.contains("次要告警")){
@@ -71,8 +86,11 @@ public class MsgItem extends LitePalSupport implements Serializable {
                 al_level = 1;
             }else{
                 al_level = -1;
+                //没有级别的告警，展示时容易遗漏, 这里简单处理，改为非告警
+                msg_category = -1;
             }
         }
+
 
     }
 

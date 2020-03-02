@@ -60,6 +60,7 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
 
                 Context context = MsgApp.getContext();
                 Intent in1=new Intent(context, MsgBodyDiagActivity.class);
+                in1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
                 in1.putExtra("msg_item", item);
                 //in1.putExtra("mode", "abstract");
                 in1.putExtra("mode", "detail");
