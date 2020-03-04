@@ -5,11 +5,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,25 +41,20 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     TextView mTextClear;
     TextView mTextWorksheet;
     TextView mTextOther;
-    private SMSContentObserver smsContentObserver;
 
-    private  Handler mHandler = new Handler(new Handler.Callback() {
-
-        public boolean  handleMessage(Message msg) {
-
-            Log.i("MsgGroupActivity", "in handleMessage");
-            switch (msg.what) {
-                case 1:
-                    String outbox = (String) msg.obj;
-                    //mTextView1.setText(outbox);
-                    mEditText1.setText(outbox);
-                    break;
-                default:
-                    break;
-            }
-            return false;
+    private boolean isBinded = false;
+    private ServiceConnection fgServiceConn = new ServiceConnection(){
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG,"ServiceConnection:onServiceDisconnected: from fgService ");
         }
-    });
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG,"ServiceConnection:onServiceConnected:ThreadID = " + Thread.currentThread().getId());
+
+            isBinded = true;
+        }
+    };
 
     @Override
     protected void onSaveInstanceState(Bundle outState){
@@ -110,7 +108,6 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_SMS},1);
         }else{
-            registerContentObservers();
         }
 
         // for broadcast receiver
@@ -140,6 +137,11 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         DataAccess.copySMSFromInboxToDB();
         Log.i(TAG,"onCreate:ThreadID = " + Thread.currentThread().getId());
 
+        Intent in=new Intent(this, FgService.class);
+        startService(in);
+        bindService(in, fgServiceConn, BIND_AUTO_CREATE);
+
+
     }
 
     @Override
@@ -147,7 +149,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         switch (requestCode) {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    registerContentObservers();
+
                 } else {
                     Toast.makeText(this, "您拒绝授予读取短信权限，无法完成正常功能!",
                             Toast.LENGTH_LONG).show();
@@ -155,7 +157,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case 2:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    registerContentObservers();
+
                 } else {
                     Toast.makeText(this, "您拒绝授予接收短信权限，无法完成正常功能!",
                             Toast.LENGTH_LONG).show();
@@ -163,7 +165,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case 3:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    registerContentObservers();
+
                 } else {
                     Toast.makeText(this, "您拒绝授予开机启动权限，无法完成正常功能!",
                             Toast.LENGTH_LONG).show();
@@ -171,7 +173,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case 4:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    registerContentObservers();
+
                 } else {
                     Toast.makeText(this, "您拒绝授予前台服务权限，无法完成正常功能!",
                             Toast.LENGTH_LONG).show();
@@ -182,13 +184,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private void registerContentObservers(){
-        //smsContentObserver = new SMSContentObserver(this, mHandler);
-        Uri smsUri = Uri.parse("content://sms");
-        //getContentResolver().registerContentObserver(smsUri,
-        //        true, smsContentObserver);
 
-    }
 
     @Override
     public void onClick(View v){
@@ -257,6 +253,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     }
 
     protected void refreshFixedGroup() {
+        Log.i(TAG,"refreshGroupLevel:ThreadID = " + Thread.currentThread().getId());
         Map<String, Integer> groupMap = null;
         DataAccess da = new DataAccess(mDataAccess);
         groupMap = da.aggregateMsgfromDB("msg_category");
@@ -302,7 +299,6 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         Log.i(TAG,"refreshGroupLevel:cntMinor = " + cntMinor);
         Log.i(TAG,"refreshGroupLevel:cntTrivial = " + cntTrivial);
         Log.i(TAG,"refreshGroupLevel:cntOther = " + cntOther);
-        Log.i(TAG,"refreshGroupLevel:ThreadID = " + Thread.currentThread().getId());
 
         mTextMajor.setText(Integer.toString(cntMajor));
         mTextMinor.setText(Integer.toString(cntMinor));
@@ -310,15 +306,15 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         mTextClear.setText(Integer.toString(cntClear));
         mTextWorksheet.setText(Integer.toString(cntWorksheet));
         mTextOther.setText(Integer.toString(cntOther));
-        new QBadgeView(this).bindTarget(mTextMajor).setBadgeNumber(10);
+        new QBadgeView(this).bindTarget(mTextMajor)
+                .setShowShadow(false)
+                .setBadgeNumber(10);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        //if (smsContentObserver != null) {
-        //    getContentResolver().unregisterContentObserver(smsContentObserver);
-        //}
+
     }
 
     @Override
@@ -330,8 +326,10 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (smsContentObserver != null) {
-            getContentResolver().unregisterContentObserver(smsContentObserver);
+        if (isBinded){
+            // 连续调用unbindService第二次，就会崩溃
+            unbindService(fgServiceConn);
+            isBinded = false;
         }
     }
 }

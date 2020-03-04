@@ -6,15 +6,38 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
 public class FgService extends Service {
     private static final String TAG = "FgService";
+
+    private SMSContentObserver smsContentObserver;
+    private Handler mHandler = new Handler(new Handler.Callback() {
+
+        public boolean  handleMessage(Message msg) {
+
+            Log.i(TAG,"Handler:handleMessage():ThreadID = " + Thread.currentThread().getId());
+            switch (msg.what) {
+                case 1:
+                    String outbox = (String) msg.obj;
+                    Toast.makeText(FgService.this, "FgService:handleMessage: msg="+outbox, Toast.LENGTH_LONG).show();
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        }
+    });
+
 
     FgBinder mBinder = new FgBinder();
 
@@ -32,6 +55,15 @@ public class FgService extends Service {
     }
 
     public FgService() {
+        Log.i(TAG,"FgService():ThreadID = " + Thread.currentThread().getId());
+    }
+
+    private void registerContentObservers(){
+        smsContentObserver = new SMSContentObserver(this, mHandler);
+        Uri smsUri = Uri.parse("content://sms");
+        getContentResolver().registerContentObserver(smsUri,
+                true, smsContentObserver);
+
     }
 
     private NotificationManager getNotiManager(){
@@ -55,7 +87,7 @@ public class FgService extends Service {
 
     @Override
     public void onCreate() {
-        Log.i(TAG,"onCreate: executed.");
+        Log.i(TAG,"onCreate:ThreadID = " + Thread.currentThread().getId());
         super.onCreate();
 
         if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
@@ -65,7 +97,7 @@ public class FgService extends Service {
             getNotiManager().createNotificationChannel(notificationChannel);
         }
 
-        Intent intent1 = new Intent(this, ActivityTry.class);
+        Intent intent1 = new Intent(this, MsgGroupActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this,0,intent1,0);
         NotificationCompat.Builder builder= new NotificationCompat.Builder(this,"chnl_id");
         builder.setContentTitle("标题");
@@ -75,6 +107,8 @@ public class FgService extends Service {
         builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher));
         builder.setContentIntent(pi);
         startForeground(1, builder.build());
+
+        registerContentObservers();
     }
 
     @Override
@@ -87,6 +121,9 @@ public class FgService extends Service {
     public void onDestroy() {
         Log.i(TAG,"onDestroy: executed.");
         super.onDestroy();
+        if (smsContentObserver != null) {
+            getContentResolver().unregisterContentObserver(smsContentObserver);
+        }
     }
 
     @Override
@@ -99,4 +136,6 @@ public class FgService extends Service {
         // -- unbindService()会不会触发onUnBind()
         // 前提是两次中间service没有被销毁、重建
     }
+
+
 }

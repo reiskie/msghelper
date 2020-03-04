@@ -9,6 +9,8 @@ import android.os.Message;
 import android.util.Log;
 
 public class SMSContentObserver extends ContentObserver {
+    private static final String TAG = "SMSContentObserver";
+
     private Context mContext  ;
     private Cursor cursor = null;
     private Handler mHandler;
@@ -17,12 +19,15 @@ public class SMSContentObserver extends ContentObserver {
         super(handler);
         mContext = context ;
         mHandler = handler ;
+        Log.i(TAG,"SMSContentObserver():ThreadID = " + Thread.currentThread().getId());
+
     }
     //  Added in API level 1
     @Override
     public void onChange(boolean selfChange){
         super.onChange(selfChange);
-        Log.i("yyy", "onChange of old version: selfChange="+selfChange);
+        Log.i(TAG, "onChange of old version: selfChange="+selfChange);
+
         //if use below delegate call then supper.onChange can only be called in onChange(boolean)
         //this.onChange(selfChange, null);
     }
@@ -32,7 +37,8 @@ public class SMSContentObserver extends ContentObserver {
     @Override
     public void onChange(boolean selfChange, Uri uri) {
         super.onChange(selfChange, uri);
-        Log.i("yyy", "onChange: selfChange="+selfChange+", Uri="+uri.toString());
+        Log.i(TAG, "onChange: selfChange="+selfChange+", Uri="+uri.toString());
+        Log.i(TAG,"onChange:ThreadID = " + Thread.currentThread().getId());
 
         if (uri == null) {
             return;
@@ -42,7 +48,7 @@ public class SMSContentObserver extends ContentObserver {
             case "content://sms/raw": //虽然收到了短信.但是短信并没有写入到收件箱里
                 return;
             case "content://sms/inbox-insert":
-                Log.i("yyy", "onChange: deal the msg here!!!");
+                Log.i(TAG, "onChange: deal the msg here!!!");
                 break;
              default:
                  //content://sms/52 (number is sms id which will increase)
@@ -56,17 +62,18 @@ public class SMSContentObserver extends ContentObserver {
                 .query(inboxUri, null, null, null,"date desc");
         if(c != null){
 
-            Log.i("xxx", "the number of inbox is "+c.getCount()) ;
+            Log.i(TAG, "the number of inbox is "+c.getCount()) ;
 
             StringBuilder sb = new StringBuilder() ;
 
             while(c.moveToNext()){
-                Log.i("xxx", c.getString(c.getColumnIndex("body")));
+                Log.i(TAG, c.getString(c.getColumnIndex("body")));
 
                 sb.append(++i)
                         .append(": 发件人手机号码: "+c.getInt(c.getColumnIndex("address")))
                         .append(" 信息内容: "+c.getString(c.getColumnIndex("body")))
                         .append("\n\n");
+                break; // for test: only read one row
             }
             c.close();
 
