@@ -100,7 +100,7 @@ public class MsgItem extends LitePalSupport implements Serializable {
             this.day = new SimpleDateFormat("dd").format(this.date);
             this.mon = new SimpleDateFormat("MM").format(this.date);
             this.year = new SimpleDateFormat("yyyy").format(this.date);
-            this.time = new SimpleDateFormat("HH:mm:SS").format(this.date);
+            this.time = new SimpleDateFormat("HH:mm:ss").format(this.date);
         }
     }
 

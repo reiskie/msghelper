@@ -213,15 +213,17 @@ public class DataAccess implements Serializable {
                 // for test
                 int id = c.getInt(c.getColumnIndex("_id"));
                 String addr = c.getString(c.getColumnIndex("address"));
-                Log.i(TAG, "inserted _id=" + id + ", address=" + addr);
+                if ( i % 1000 == 0){
+                    Log.i(TAG, "copySMSFromInboxToDB [" + i + "]: inserted _id=" + id + ", address=" + addr);
+                }
                 //if (i >= 2) break;
             }
             c.close();
 
-            Log.i(TAG, "inserted count of rows: " + i );
+            Log.i(TAG, "copySMSFromInboxToDB: inserted count of rows: " + i );
         }
 
-        return true;
+        return (i>0);
     }
 
 
@@ -229,7 +231,7 @@ public class DataAccess implements Serializable {
     // E.g.@github
     // List<Song> songs = LitePal.where("name like ? and duration < ?", "song%", "200").order("duration").find(Song.class);
     // 注意: where方法的参数是(String... conditions), 不支持用String[]数组表示条件中用到的多个值.
-    public List<MsgItem> getMsgfromDB(boolean flag ){
+    public List<MsgItem> getMsgfromDB(boolean setRead ){
         List<MsgItem> result = null;
 
         result = LitePal
@@ -239,6 +241,15 @@ public class DataAccess implements Serializable {
 
         Log.i(TAG, "getMsgfromDB: result.size() = " + result.size());
         Log.i(TAG, "getMsgfromDB: result = " + result);
+
+        if  (setRead && result.size()>0){
+            for (MsgItem item : result){
+                if (!item.isIs_read()){
+                    item.setIs_read(true);
+                    item.save();
+                }
+            }
+        }
 
         return result;
     }
@@ -289,6 +300,32 @@ public class DataAccess implements Serializable {
         return result;
     }
 
+    public Map<String, Integer>  aggregateMsgfromDB(String aggregate_col, String condition){
+        HashMap<String, Integer> result = new HashMap<String, Integer>();
+        Log.i(TAG,"aggregateMsgfromDB(), aggregate_cod=" + aggregate_col + ", cond=" + condition);
+
+        String sqlstr = new String("select ");
+        sqlstr = sqlstr + aggregate_col + ", count(1) from msgitem where "
+                + this.getPredicateString() + " and " + condition
+                + " group by " + aggregate_col + " order by " + aggregate_col;
+        Log.i(TAG,"aggregateMsgfromDB(), sqlstr=" + sqlstr);
+
+        Cursor c = LitePal.findBySQL(sqlstr);
+        if (c != null){
+            if(c.moveToFirst()) {
+                do {
+                    String col = c.getString(0);
+                    int cnt = c.getInt(1);
+                    result.put(col, cnt);
+                } while (c.moveToNext());
+            }
+            c.close();
+        }
+
+        Log.i(TAG,"aggregateMsgfromDB(), result=" + result);
+
+        return result;
+    }
 
 
 }

@@ -49,7 +49,7 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
             public void onClick(View view) {
                 int position = holder.getAdapterPosition();
                 MsgItem item = mMsgItemList.get(position);
-                Toast.makeText(view.getContext(), "你点击了View"+ item.getAddress(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(view.getContext(), "你点击了View"+ item.getAddress(), Toast.LENGTH_SHORT).show();
             }
         });
         holder.itemBody.setOnClickListener(new View.OnClickListener() {

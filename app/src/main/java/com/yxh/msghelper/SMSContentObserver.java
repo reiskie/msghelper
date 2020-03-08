@@ -8,15 +8,21 @@ import android.net.Uri;
 import android.os.Message;
 import android.util.Log;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class SMSContentObserver extends ContentObserver {
     private static final String TAG = "SMSContentObserver";
 
     private Context mContext  ;
     private Cursor cursor = null;
     private Handler mHandler;
+    private Lock lock = new ReentrantLock();
+    private boolean isNewSmsToRead;
+    private boolean isThreadBusy;
 
     public SMSContentObserver(Context context, Handler handler) {
-        super(handler);
+            super(null);
         mContext = context ;
         mHandler = handler ;
         Log.i(TAG,"SMSContentObserver():ThreadID = " + Thread.currentThread().getId());
@@ -49,6 +55,7 @@ public class SMSContentObserver extends ContentObserver {
                 return;
             case "content://sms/inbox-insert":
                 Log.i(TAG, "onChange: deal the msg here!!!");
+                triggerReadSmsAsync();
                 break;
              default:
                  //content://sms/52 (number is sms id which will increase)
@@ -77,14 +84,56 @@ public class SMSContentObserver extends ContentObserver {
             }
             c.close();
 
-            Message message = mHandler.obtainMessage(1);
-            message.obj = sb.toString();
-            mHandler.sendMessage(message);
+            //Message message = mHandler.obtainMessage(1);
+            //message.obj = sb.toString();
+            //mHandler.sendMessage(message);
         }
     }
 
+    public void triggerReadSmsAsync(){
+        lock.lock();
+        try{
+            isNewSmsToRead = true;
+            if (!isThreadBusy){
+                isThreadBusy = true;
+                readSmsAsync();
+            }
+        }finally {
+            lock.unlock();
+        }
+    }
 
+    private void readSmsAsync(){
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true){
+                    isNewSmsToRead = false; // this must before copySMSFromInboxToDB
+                    DataAccess.copySMSFromInboxToDB();
 
+                    try{
+                        Thread.sleep(500);
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+
+                    lock.lock();
+                    try{
+                        if (!isNewSmsToRead){
+                            isThreadBusy = false;
+                            break;
+                        }
+                    }finally {
+                        lock.unlock();
+                    }
+                }
+
+                Message message = mHandler.obtainMessage(1);
+                mHandler.sendMessage(message);
+
+            }
+        }).start();
+    }
 
 }

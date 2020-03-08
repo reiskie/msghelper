@@ -29,14 +29,14 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         sb.append("日期: " + item.getYear() + item.getMon()+item.getDay());
         sb.append(", 时间: " + item.getTime() + "  ");
         sb.append(", 号码: " + item.getAddress() );
-        sb.append(", 系统=" + item.getSystem());
-        sb.append(", 级别=" + item.getAl_level(true));
+        //sb.append(", 系统=" + item.getSystem());
+        //sb.append(", 级别=" + item.getAl_level(true));
         if(getIntent().getStringExtra("mode").equals("detail")){
             sb.append("\n")
-                    .append(", raw_id=" + item.getRaw_id())
-                    .append(", thread_id=" + item.getThread_id())
+                    //.append(", raw_id=" + item.getRaw_id())
+                    //.append(", thread_id=" + item.getThread_id())
                     .append(", category=" + item.getMsg_category())
-                    .append(", source=" + item.getMsg_srouce())
+                    //.append(", source=" + item.getMsg_srouce())
                     .append(", is_read=" + item.isIs_read())
                     .append(", is_cleared=" + item.isIs_cleared());
         }

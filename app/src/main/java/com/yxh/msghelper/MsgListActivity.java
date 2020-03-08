@@ -65,28 +65,6 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
         recyclerView.setAdapter(mAdapter);
         recyclerView.scrollToPosition(itemList.size()-1);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) !=
-                PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_SMS},1);
-        }else{
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,int[] grantResults){
-        switch (requestCode) {
-            case 1:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                } else {
-                    Toast.makeText(this, "您拒绝授予此应用权限，无法完成正常功能",
-                            Toast.LENGTH_LONG).show();
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     @Override
@@ -120,7 +98,7 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
             public void run() {
                 try{
                     // re-read the itemList
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
 
                 }catch (InterruptedException e){
                     e.printStackTrace();
