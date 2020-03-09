@@ -1,243 +1,272 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
-        <com.google.android.material.appbar.AppBarLayout
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:popupTheme="@style/Theme.AppCompat.Light"
+            app:title="概览" />
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:layout_scrollFlags="scroll|enterAlways|snap"
-                app:popupTheme="@style/Theme.AppCompat.Light" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        </com.google.android.material.appbar.AppBarLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_try"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="启动实验界面"
-            android:visibility="gone"
-            />
-
-        <Button
-            android:id="@+id/btn_refresh"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="刷新短信"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/button_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="查看全部信息" />
-
-        <TextView
-            android:id="@+id/text_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="pretext!"
-            android:visibility="gone" />
-
-        <EditText
-            android:id="@+id/edittext_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="type something"
-            android:lines="10"
-            android:visibility="gone" />
-
-        <HorizontalScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scrollbars="none">
-
-            <LinearLayout
+            <Button
+                android:id="@+id/btn_try"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:text="启动实验界面"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/text_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="pretext!"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/edittext_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="type something"
+                android:lines="10"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_refresh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="刷新短信"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/button_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="查看全部信息"
+                android:textColor="#6B6A6A"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/text_top_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:gravity="center"
+                android:text="近24小时信息概览"
+                android:textSize="14sp"
+                android:visibility="visible" />
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="20dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/text_major"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginRight="10dp"
-                        android:background="@drawable/text_major_bg"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp">
 
-                    <TextView
-                        android:id="@+id/text_minor"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginRight="10dp"
-                        android:background="@drawable/text_minor_bg"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp" />
+                        <TextView
+                            android:id="@+id/text_major"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/text_major_bg"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp" />
 
-                    <TextView
-                        android:id="@+id/text_trivial"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginRight="10dp"
-                        android:background="@drawable/text_trivial_bg"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp" />
+                        <TextView
+                            android:id="@+id/text_minor"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/text_minor_bg"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp" />
 
-                    <TextView
-                        android:id="@+id/text_clear"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginRight="10dp"
-                        android:background="@drawable/text_clear_bg"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp" />
+                        <TextView
+                            android:id="@+id/text_trivial"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/text_trivial_bg"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp" />
 
-                    <TextView
-                        android:id="@+id/text_worksheet"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginRight="10dp"
-                        android:background="@drawable/text_worksheet_bg"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp" />
+                        <TextView
+                            android:id="@+id/text_clear"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/text_clear_bg"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp" />
 
-                    <TextView
-                        android:id="@+id/text_other"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginRight="10dp"
-                        android:background="@drawable/text_other_bg"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp" />
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp">
+
+                        <TextView
+                            android:id="@+id/text_major_bottom"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
+                            android:text="主要"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/text_minor_bottom"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
+                            android:text="次要"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/text_trivial_bottom"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
+                            android:text="警告"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/text_clear_bottom"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
+                            android:text="清除"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="10dp">
+
+                        <TextView
+                            android:id="@+id/text_worksheet"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/text_worksheet_bg"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/text_other"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/text_other_bg"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:text="0"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp">
+
+                        <TextView
+                            android:id="@+id/text_worksheet_bottom"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
+                            android:text="工单"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/text_other_bottom"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
+                            android:text="其他"
+                            android:textSize="16sp" />
+                    </LinearLayout>
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp">
-
-                    <TextView
-                        android:id="@+id/text_major_bottom"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:gravity="center"
-                        android:text="主要"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/text_minor_bottom"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:gravity="center"
-                        android:text="次要"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/text_trivial_bottom"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:gravity="center"
-                        android:text="警告"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/text_clear_bottom"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:gravity="center"
-                        android:text="清除"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/text_worksheet_bottom"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:gravity="center"
-                        android:text="工单"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/text_other_bottom"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:gravity="center"
-                        android:text="其他"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </HorizontalScrollView>
+            </HorizontalScrollView>
 
         </LinearLayout>
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </ScrollView>
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

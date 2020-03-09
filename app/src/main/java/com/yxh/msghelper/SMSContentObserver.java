@@ -108,9 +108,10 @@ public class SMSContentObserver extends ContentObserver {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                int num = 0;
                 while (true){
                     isNewSmsToRead = false; // this must before copySMSFromInboxToDB
-                    DataAccess.copySMSFromInboxToDB();
+                    num = num + DataAccess.copySMSFromInboxToDB();
 
                     try{
                         Thread.sleep(500);
@@ -130,6 +131,7 @@ public class SMSContentObserver extends ContentObserver {
                 }
 
                 Message message = mHandler.obtainMessage(1);
+                message.obj = (Integer) Integer.valueOf(num);
                 mHandler.sendMessage(message);
 
             }

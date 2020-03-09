@@ -68,11 +68,10 @@
         <activity
             android:name=".MsgListActivity"
             android:launchMode="singleTask"
-            android:label="信息清单"/>
+            android:label="列表"/>
         <activity
             android:name=".MsgGroupActivity"
-            android:launchMode="singleTask"
-            android:label="信息概览">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

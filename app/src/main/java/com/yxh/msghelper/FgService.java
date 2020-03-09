@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -38,7 +39,12 @@ public class FgService extends Service {
                     if (groupUpdater != null){
                         groupUpdater.update();
                     }
-                    getNotiManager().notify(1, getNotification());
+
+                    int num = ((Integer)msg.obj).intValue();
+                    String str = getDefaultNotiContent();
+                    if (num > 0 && str != null && !str.isEmpty()){
+                        getNotiManager().notify(1, getNotification(str));
+                    }
                     break;
                 default:
                     break;
@@ -73,7 +79,7 @@ public class FgService extends Service {
         Log.i(TAG,"onCreate:ThreadID = " + Thread.currentThread().getId());
         super.onCreate();
         mDataAccess = new DataAccess();
-        startForeground(1, getNotification());
+        startForeground(1, getNotification(getDefaultNotiContent()));
         registerContentObservers();
     }
 
@@ -89,20 +95,23 @@ public class FgService extends Service {
         return (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
-    private Notification getNotification(){
+    private Notification getNotification(String str){
 
         if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
             //只在Android O之上需要channel
-            NotificationChannel notificationChannel =
+            NotificationChannel channel =
                     new NotificationChannel("chnl_id","MsgHelper",NotificationManager.IMPORTANCE_HIGH);
-            getNotiManager().createNotificationChannel(notificationChannel);
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+            channel.setShowBadge(true);
+            getNotiManager().createNotificationChannel(channel);
         }
 
         Intent intent1 = new Intent(this, MsgGroupActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this,0,intent1,0);
         NotificationCompat.Builder builder= new NotificationCompat.Builder(this,"chnl_id");
         builder.setContentTitle("24小时内未读消息");
-        builder.setContentText(getDefaultNotiContent());
+        builder.setContentText(str);
         builder.setPriority(NotificationManager.IMPORTANCE_HIGH);
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_launcher);
@@ -114,8 +123,22 @@ public class FgService extends Service {
 
     private String getDefaultNotiContent(){
         Map<String, Integer> groupMap = null;
-        groupMap = mDataAccess.aggregateMsgfromDB("al_level", "is_read = 0");
+        groupMap = mDataAccess.aggregateMsgfromDB("msg_category", "is_read = 0");
+        int newOther = 0;
+        int newWorksheet = 0;
 
+        for (String key : groupMap.keySet()) {
+            if (key.equals("-1")){
+                newOther     = groupMap.get(key);
+            }else if (key.equals("2")){
+                newWorksheet = groupMap.get(key);
+            }else{
+                // 1-告警
+                // 0-初始化值，不可能有
+            }
+        }
+
+        groupMap = mDataAccess.aggregateMsgfromDB("al_level", "is_read = 0");
         int newMajor = 0;
         int newMinor = 0;
         int newTrivial = 0;
@@ -127,14 +150,17 @@ public class FgService extends Service {
                 newMajor = groupMap.get(key);
             }else if (key.equals("2")){
                 newMinor = groupMap.get(key);
-//            }else if (key.equals("3")){
-//                newTrivial = groupMap.get(key);
-//            }else if (key.equals("4")){
-//                newClear = groupMap.get(key);
+            }else if (key.equals("3")){
+                newTrivial = groupMap.get(key);
+            }else if (key.equals("4")){
+                newClear = groupMap.get(key);
             }else{
             }
         }
-        String res = new String("主要: "+ newMajor + " 次要: " + newMinor);
+
+        // 待优化，如果都是0，不应该发通知
+        String res = new String("主要: "+ newMajor + " 次要: " + newMinor
+                    + " 警告: " + newTrivial + " 工单: " + newWorksheet);
         return res;
     }
 
