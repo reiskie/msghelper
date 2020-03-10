@@ -114,7 +114,7 @@ public class SMSContentObserver extends ContentObserver {
                     num = num + DataAccess.copySMSFromInboxToDB();
 
                     try{
-                        Thread.sleep(500);
+                        Thread.sleep(300);
                     }catch (InterruptedException e){
                         e.printStackTrace();
                     }
@@ -133,6 +133,7 @@ public class SMSContentObserver extends ContentObserver {
                 Message message = mHandler.obtainMessage(1);
                 message.obj = (Integer) Integer.valueOf(num);
                 mHandler.sendMessage(message);
+
 
             }
         }).start();

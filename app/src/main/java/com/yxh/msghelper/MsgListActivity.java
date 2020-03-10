@@ -3,10 +3,14 @@ package com.yxh.msghelper;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +36,21 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
     private MsgItemAdapter mAdapter;
     RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefresh;
+    private boolean isBinded;
+    private FgService.FgBinder mFgBinder;
+    private ServiceConnection fgServiceConn = new ServiceConnection(){
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG,"ServiceConnection:onServiceDisconnected: from fgService ");
+        }
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG,"ServiceConnection:onServiceConnected:ThreadID = " + Thread.currentThread().getId());
+            isBinded = true;
+            mFgBinder = (FgService.FgBinder)service;
+            mFgBinder.triggerUpdateNotification();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +83,11 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
         mAdapter = new MsgItemAdapter(itemList);
         recyclerView.setAdapter(mAdapter);
         recyclerView.scrollToPosition(itemList.size()-1);
+
+        if ( !isBinded){
+            Intent in=new Intent(this, FgService.class);
+            bindService(in, fgServiceConn, BIND_AUTO_CREATE);
+        }
 
     }
 
@@ -117,6 +141,29 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
                 });
             }
         }).start();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+
+    @Override
+    protected void onPause() {
+        Log.i(TAG,"onPause executed" );
+        super.onPause();
+
+        if (isBinded){
+            //Log.i(TAG,"onPause(), clear updater and unbindService." );
+            //mFgBinder.setGroupUpdater(null);
+            // 连续调用unbindService第二次，就会崩溃
+            unbindService(fgServiceConn);
+            isBinded = false;
+            Log.i(TAG, "onPause(), after unbindService, mFgBinder = " + mFgBinder);
+            mFgBinder = null;
+        }
     }
 
 }

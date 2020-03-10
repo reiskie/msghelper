@@ -83,8 +83,10 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 mFgBinder.triggerReadSmsAsync();
                 isJustCreated = false;
             }else{
-                // 从后台回到前台，或切回桌面后又切回来，在onResume中再次bind服务
-                // 因为pause时unbind了，期间无法接收到updater的更新调用，所以resume后需要更新一下
+                // 从后台回到前台，或切回桌面后又切回来
+                // -- pause时unbind了，resume重新bind服务
+                // -- 期间无法接收到updater的更新UI调用，但新短信仍然通过observer可以入库
+                // -- 所以这里（再次bind成功后）需要执行一次更新UI
                 refreshFixedGroup();
             }
         }

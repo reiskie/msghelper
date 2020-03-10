@@ -17,8 +17,11 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,6 +32,7 @@ public class FgService extends Service {
     private MsgGroupActivity.ActivityGroupUpdater groupUpdater;
     private SMSContentObserver smsContentObserver;
     private FgBinder mBinder = this.new FgBinder();
+    private NotificationValuesHolder lastHolder;
     private Handler mHandler = new Handler(new Handler.Callback() {
         public boolean  handleMessage(Message msg) {
             Log.i(TAG,"Handler:handleMessage():ThreadID = " + Thread.currentThread().getId());
@@ -36,15 +40,12 @@ public class FgService extends Service {
                 case 1:
                     //String outbox = (String) msg.obj;
                     //Toast.makeText(FgService.this, "FgService:handleMessage: msg="+outbox, Toast.LENGTH_LONG).show();
-                    if (groupUpdater != null){
+                    int num = ((Integer)msg.obj).intValue();
+                    // num一定大于0
+                    if (groupUpdater != null) {
                         groupUpdater.update();
                     }
-
-                    int num = ((Integer)msg.obj).intValue();
-                    String str = getDefaultNotiContent();
-                    if (num > 0 && str != null && !str.isEmpty()){
-                        getNotiManager().notify(1, getNotification(str));
-                    }
+                    updateNotification();
                     break;
                 default:
                     break;
@@ -59,9 +60,12 @@ public class FgService extends Service {
         public void setGroupUpdater(MsgGroupActivity.ActivityGroupUpdater updater){
             groupUpdater = updater;
         }
-
         public void triggerReadSmsAsync(){
             FgService.this.triggerReadSmsAsync();
+        }
+        public void triggerUpdateNotification(){FgService.this.updateNotification();}
+        public List<MsgGroupItem> getMsgGroupResult(String groupKey, boolean onlyForBadge) {
+            return FgService.this.getMsgGroupResult(groupKey, onlyForBadge);
         }
 
         public int getStatus(){
@@ -69,6 +73,7 @@ public class FgService extends Service {
             return status;
         }
     }
+
 
     public FgService() {
         Log.i(TAG,"FgService():ThreadID = " + Thread.currentThread().getId());
@@ -79,7 +84,7 @@ public class FgService extends Service {
         Log.i(TAG,"onCreate:ThreadID = " + Thread.currentThread().getId());
         super.onCreate();
         mDataAccess = new DataAccess();
-        startForeground(1, getNotification(getDefaultNotiContent()));
+        startForeground(1, getNotification("信息监控中..."));
         registerContentObservers();
     }
 
@@ -89,6 +94,67 @@ public class FgService extends Service {
         getContentResolver().registerContentObserver(smsUri,
                 true, smsContentObserver);
 
+    }
+
+    public List<MsgGroupItem> getMsgGroupResult(String groupKey, boolean onlyForBadge){
+        List<MsgGroupItem> list = new ArrayList<MsgGroupItem>();
+        Map<String, Integer> groupMap = null;
+        Map<String, Integer> badgeMap = null;
+
+        if (onlyForBadge){
+            badgeMap = mDataAccess.aggregateMsgfromDB(groupKey, "is_read = 0");
+            groupMap = badgeMap;
+        }else{
+            groupMap = mDataAccess.aggregateMsgfromDB(groupKey);
+            badgeMap = mDataAccess.aggregateMsgfromDB(groupKey, "is_read = 0");
+        }
+
+        for (String key : groupMap.keySet()) {
+            MsgGroupItem item = new MsgGroupItem(key);
+            item.setCount(groupMap.get(key));
+            if(badgeMap.containsKey(key)){
+                item.setCountBadge(badgeMap.get(key));
+            }// if not in badgeMap, default value of item.countBadge is 0, that's right.
+            list.add(item);
+        }
+        return list;
+    }
+
+    public void updateNotification(){
+
+        List<MsgGroupItem> badgeCategory = getMsgGroupResult("msg_category", true);
+        List<MsgGroupItem> badgeLevel    = getMsgGroupResult("al_level", true);
+
+        NotificationValuesHolder holder = new NotificationValuesHolder();
+
+        for (MsgGroupItem item:badgeCategory){
+            if ("-1".equals(item.getKey())) {
+                holder.setBadgeOther(item.getCountBadge());
+            }else if ("2".equals(item.getKey())){
+                holder.setBadgeWorksheet(item.getCountBadge());
+            }else{
+            }
+        }
+        for (MsgGroupItem item:badgeLevel){
+            if ("1".equals(item.getKey())){
+                holder.setBadgeMajor(item.getCountBadge());
+            }else if ("2".equals(item.getKey())){
+                holder.setBadgeMinor(item.getCountBadge());
+            }else if ("3".equals(item.getKey())){
+                holder.setBadgeTrivial(item.getCountBadge());
+            }else if ("4".equals(item.getKey())){
+                holder.setBadgeClear(item.getCountBadge());
+            }else{
+            }
+        }
+
+        // 有变化时才发通知
+        if (lastHolder == null || !holder.equals(lastHolder)){
+            String str = holder.getString();
+            Log.i(TAG, "notification str=" + str);
+            getNotiManager().notify(1, getNotification(str));
+        }
+        lastHolder = holder;
     }
 
     private NotificationManager getNotiManager(){
@@ -110,7 +176,7 @@ public class FgService extends Service {
         Intent intent1 = new Intent(this, MsgGroupActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this,0,intent1,0);
         NotificationCompat.Builder builder= new NotificationCompat.Builder(this,"chnl_id");
-        builder.setContentTitle("24小时内未读消息");
+        builder.setContentTitle("未读消息");
         builder.setContentText(str);
         builder.setPriority(NotificationManager.IMPORTANCE_HIGH);
         builder.setWhen(System.currentTimeMillis());
@@ -237,4 +303,84 @@ public class FgService extends Service {
                                                          进入onDestroy                                    没进入onDestroy
         */
     }
+
+
+
+    class NotificationValuesHolder{
+        int badgeOther ;
+        int badgeWorksheet ;
+        int badgeMajor ;
+        int badgeMinor ;
+        int badgeTrivial ;
+        int badgeClear ;
+
+        String getString(){
+            String str = new String("主要: "+ badgeMajor + " 次要: " + badgeMinor
+                    + " 警告: " + badgeTrivial + " 工单: " + badgeWorksheet + " 其他: " + badgeOther);
+            return str;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            //return super.equals(obj);
+            NotificationValuesHolder ob=(NotificationValuesHolder) obj;
+            return (
+                    this.badgeWorksheet == ob.getBadgeWorksheet()
+                    && this.badgeOther == ob.getBadgeOther()
+                    && this.badgeMajor == ob.getBadgeMajor()
+                    && this.badgeMinor == ob.getBadgeMinor()
+                    && this.badgeTrivial == ob.getBadgeTrivial()
+                    //&& this.badgeClear == ob.getBadgeClear()
+                   );
+        }
+
+        public void setBadgeOther(int badgeOther) {
+            this.badgeOther = badgeOther;
+        }
+
+        public void setBadgeWorksheet(int badgeWorksheet) {
+            this.badgeWorksheet = badgeWorksheet;
+        }
+
+        public void setBadgeMajor(int badgeMajor) {
+            this.badgeMajor = badgeMajor;
+        }
+
+        public void setBadgeMinor(int badgeMinor) {
+            this.badgeMinor = badgeMinor;
+        }
+
+        public void setBadgeTrivial(int badgeTrivial) {
+            this.badgeTrivial = badgeTrivial;
+        }
+
+        public void setBadgeClear(int badgeClear) {
+            this.badgeClear = badgeClear;
+        }
+
+        public int getBadgeOther() {
+            return badgeOther;
+        }
+
+        public int getBadgeWorksheet() {
+            return badgeWorksheet;
+        }
+
+        public int getBadgeMajor() {
+            return badgeMajor;
+        }
+
+        public int getBadgeMinor() {
+            return badgeMinor;
+        }
+
+        public int getBadgeTrivial() {
+            return badgeTrivial;
+        }
+
+        public int getBadgeClear() {
+            return badgeClear;
+        }
+    }
+
 }
