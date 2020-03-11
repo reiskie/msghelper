@@ -43,13 +43,15 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.msg_item, parent,false);
+
         final ViewHolder holder = new ViewHolder(view);
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int position = holder.getAdapterPosition();
                 MsgItem item = mMsgItemList.get(position);
-                //Toast.makeText(view.getContext(), "你点击了View"+ item.getAddress(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(view.getContext(), "你点击了View" + item.getAddress(), Toast.LENGTH_SHORT).show();
             }
         });
         holder.itemBody.setOnClickListener(new View.OnClickListener() {
@@ -58,14 +60,16 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
                 int position = holder.getAdapterPosition();
                 MsgItem item = mMsgItemList.get(position);
 
-                Context context = MsgApp.getContext();
-                Intent in1=new Intent(context, MsgBodyDiagActivity.class);
-                in1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-                in1.putExtra("msg_item", item);
-                //in1.putExtra("mode", "abstract");
-                in1.putExtra("mode", "detail");
-                context.startActivity(in1);
-                //Toast.makeText(view.getContext(), "你点击了TextView(body)"+ item.getBody(), Toast.LENGTH_SHORT).show();
+                if (item.getInternal_flag() != 1) {
+                    Context context = MsgApp.getContext();
+                    Intent in1 = new Intent(context, MsgBodyDiagActivity.class);
+                    in1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    in1.putExtra("msg_item", item);
+                    //in1.putExtra("mode", "abstract");
+                    in1.putExtra("mode", "detail");
+                    context.startActivity(in1);
+                    //Toast.makeText(view.getContext(), "你点击了TextView(body)"+ item.getBody(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -75,11 +79,19 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MsgItem item = mMsgItemList.get(position);
-        item.formatDate();
-        holder.itemDate.setText(item.getTime());
-        holder.itemAddress.setText(item.getAddress());
-        holder.itemTag.setText("TAG");
-        holder.itemBody.setText(item.getBody());
+        if (item.getInternal_flag() != 1){
+            item.formatDate();
+            holder.itemDate.setText(item.getTime());
+            holder.itemAddress.setText(item.getMon()+"月"+item.getDay()+"日");
+            holder.itemTag.setText("TAG");
+            holder.itemBody.setText(item.getBody());
+        }else{
+            holder.itemDate.setText("");
+            holder.itemAddress.setText("");
+            holder.itemTag.setText("");
+            holder.itemBody.setText("");
+            //holder.itemBody.setVisibility(View.GONE);
+        }
     }
 
     @Override

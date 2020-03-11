@@ -3,6 +3,7 @@ package com.yxh.msghelper;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -21,8 +22,19 @@ public class ReceiverStaticSMS extends BroadcastReceiver {
         // 02-16, not work，来短信时，收不到广播
         // 02-18, 在主活动添加运行时权限RECEIVE_SMS后， it work
         Log.i(TAG, "onReceive: executed.");
-        Toast.makeText(context, "ReceiverStaticSMS:onReceive executed.", Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, "ReceiverStaticSMS:onReceive executed.", Toast.LENGTH_LONG).show();
 
+        // 收到任何短信，都尝试启动服务
+        Intent in = new Intent(MsgApp.getContext(), FgService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            MsgApp.getContext().startForegroundService(in);
+        } else {
+            MsgApp.getContext().startService(in);
+        }
+
+/*
+
+        // for test
         Bundle bundle = intent.getExtras();
         // pdu是短信的基本承载单元，短信要求长度，超过长度则被分为许多个pdu
         Object[] objects = (Object[]) bundle.get("pdus");
@@ -37,6 +49,7 @@ public class ReceiverStaticSMS extends BroadcastReceiver {
             String dipBody = message.getDisplayMessageBody();
             Log.i(TAG,number+":"+content);
         }
+*/
 
     }
 }

@@ -153,6 +153,8 @@ public class FgService extends Service {
             String str = holder.getString();
             Log.i(TAG, "notification str=" + str);
             getNotiManager().notify(1, getNotification(str));
+            //getNotiManager().notify(2, getNotification(str));
+            // 每个ID一条通知
         }
         lastHolder = holder;
     }
@@ -237,7 +239,8 @@ public class FgService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int res = super.onStartCommand(intent, flags, startId);
-        Log.i(TAG,"onStratCommand: executed. res = " + res);
+        Log.i(TAG,"onStratCommand: executed. res = " + res +
+                ", threadId = " + Thread.currentThread().getId());
         // 0 - START_STICKY_COMPATIBILITY
         // 1 - START_STICKY
         return res;

@@ -54,6 +54,16 @@ public class MsgItem extends LitePalSupport implements Serializable {
     private String year;
     @Column(ignore = true)
     private String time;
+    @Column(ignore = true)
+    private int internal_flag; // 1 - 用于列表最后一行占位，解决recyclerView最后一行显示不全
+
+    public int getInternal_flag() {
+        return internal_flag;
+    }
+
+    public void setInternal_flag(int internal_flag) {
+        this.internal_flag = internal_flag;
+    }
 
     public void extractInfo() {
 
@@ -155,8 +165,22 @@ public class MsgItem extends LitePalSupport implements Serializable {
         this.is_read = is_read;
     }
 
-    public int getMsg_category() {
-        return msg_category;
+    public int getMsg_category() { return msg_category;  }
+    public String getMsg_category(boolean flag) {
+        String category;
+        switch(msg_category){
+            case 1:
+                category = "告警";
+                break;
+            case 2:
+                category = "工单";
+                break;
+            default:
+                category  = "未知";
+                break;
+        }
+        return category;
+
     }
 
     public void setMsg_category(int msg_category) {

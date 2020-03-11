@@ -26,19 +26,20 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         textBody.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         StringBuilder sb = new StringBuilder() ;
-        sb.append("日期: " + item.getYear() + item.getMon()+item.getDay());
-        sb.append(", 时间: " + item.getTime() + "  ");
-        sb.append(", 号码: " + item.getAddress() );
+        sb.append("日期: " + item.getYear() + "-"+ item.getMon()+"-"+item.getDay());
+        sb.append(", 时间: " + item.getTime() + "\n");
+        sb.append("号码: " + item.getAddress() + "\n");
         //sb.append(", 系统=" + item.getSystem());
-        //sb.append(", 级别=" + item.getAl_level(true));
+        sb.append("分类: " + item.getMsg_category(true));
+        sb.append(", 级别: " + item.getAl_level(true));
         if(getIntent().getStringExtra("mode").equals("detail")){
-            sb.append("\n")
+            sb.append("")
                     //.append(", raw_id=" + item.getRaw_id())
                     //.append(", thread_id=" + item.getThread_id())
-                    .append(", category=" + item.getMsg_category())
                     //.append(", source=" + item.getMsg_srouce())
-                    .append(", is_read=" + item.isIs_read())
-                    .append(", is_cleared=" + item.isIs_cleared());
+                    //.append(", is_read=" + item.isIs_read())
+                    //.append(", is_cleared=" + item.isIs_cleared())
+            ;
         }
         TextView textHead = findViewById(R.id.text_header);
         textHead.setText(sb.toString());

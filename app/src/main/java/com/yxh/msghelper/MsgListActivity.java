@@ -76,13 +76,19 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
         dataAccess = (DataAccess)getIntent().getSerializableExtra("dataAccess");
 
         itemList = dataAccess.getMsgfromDB(true);
+        MsgItem blankItem = new MsgItem();
+        blankItem.setInternal_flag(1); //占位，解决最后一行显示不全
+        itemList.add(blankItem);
 
         recyclerView = findViewById(R.id.recycler_view);
         LinearLayoutManager layoutManager= new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         mAdapter = new MsgItemAdapter(itemList);
         recyclerView.setAdapter(mAdapter);
-        recyclerView.scrollToPosition(itemList.size()-1);
+        // 最后一行显示不全
+        recyclerView.scrollToPosition(itemList.size()-1); // 不全
+        //recyclerView.smoothScrollToPosition(itemList.size()-1); //不全
+        //layoutManager.scrollToPositionWithOffset(itemList.size()-1,0); //不全
 
         if ( !isBinded){
             Intent in=new Intent(this, FgService.class);
