@@ -99,5 +99,9 @@
             android:layout_weight="1"
             android:text="读取SMS表" />
     </LinearLayout>
-
+    <Button
+        android:id="@+id/btn_badge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="设置badge" />
 </LinearLayout>

@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import me.leolin.shortcutbadger.ShortcutBadger;
+
 // 原来的 MainActivity, refactor为 ActivityTry
 public class ActivityTry extends AppCompatActivity implements View.OnClickListener{
 
@@ -74,6 +76,7 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
         findViewById(R.id.btn_clear_sms).setOnClickListener(this);
         findViewById(R.id.btn_save_sms).setOnClickListener(this);
         findViewById(R.id.btn_read_sms).setOnClickListener(this);
+        findViewById(R.id.btn_badge).setOnClickListener(this);
 
 
     }
@@ -110,6 +113,7 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
                 //sendOrderedBroadcast(intent,null); // 发送有序（ordered）广播
                 break;
             case R.id.btn_send_broadcast_2:
+                Log.i(TAG,"onClick:btn_send_broadcast_2 send selfdef static broadcast " );
                 in = new Intent("com.yxh.msghelper.normal_broadcast_static");
                 sendBroadcast(in);
                 break;
@@ -147,6 +151,11 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
                         new DataAccess(0, null, 0,0,0) ;
                 dataAccess.getMsgfromDB(true);
                 dataAccess.aggregateMsgfromDB("address");
+                break;
+            case R.id.btn_badge:
+                Log.i(TAG,"onClick:btn_badge, isBadgeCounterSupported = " + ShortcutBadger.isBadgeCounterSupported(this) );
+                ShortcutBadger.applyCount(this, (int)(Math.random()*100));
+
                 break;
             default:
                 break;

@@ -134,7 +134,6 @@ public class SMSContentObserver extends ContentObserver {
                 message.obj = (Integer) Integer.valueOf(num);
                 mHandler.sendMessage(message);
 
-
             }
         }).start();
     }

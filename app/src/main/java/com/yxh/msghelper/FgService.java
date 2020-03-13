@@ -16,7 +16,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
-
+import me.leolin.shortcutbadger.ShortcutBadger;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
@@ -41,7 +41,7 @@ public class FgService extends Service {
                     //String outbox = (String) msg.obj;
                     //Toast.makeText(FgService.this, "FgService:handleMessage: msg="+outbox, Toast.LENGTH_LONG).show();
                     int num = ((Integer)msg.obj).intValue();
-                    // num一定大于0
+
                     if (groupUpdater != null) {
                         groupUpdater.update();
                     }
@@ -73,7 +73,6 @@ public class FgService extends Service {
             return status;
         }
     }
-
 
     public FgService() {
         Log.i(TAG,"FgService():ThreadID = " + Thread.currentThread().getId());
@@ -151,8 +150,12 @@ public class FgService extends Service {
         // 有变化时才发通知
         if (lastHolder == null || !holder.equals(lastHolder)){
             String str = holder.getString();
-            Log.i(TAG, "notification str=" + str);
-            getNotiManager().notify(1, getNotification(str));
+            int badgeCount = holder.getWholeNumber();
+            Log.i(TAG, "notification str=" + str + ", badgeCount=" +badgeCount);
+            Notification notification = getNotification(str);
+            ShortcutBadger.applyCount(this, badgeCount);
+            //ShortcutBadger.applyNotification(this, notification, 100);
+            getNotiManager().notify(1, notification);
             //getNotiManager().notify(2, getNotification(str));
             // 每个ID一条通知
         }
@@ -165,71 +168,33 @@ public class FgService extends Service {
 
     private Notification getNotification(String str){
 
+        String CHNL_ID="yxh.chnl_id.1";
+
         if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
             //只在Android O之上需要channel
             NotificationChannel channel =
-                    new NotificationChannel("chnl_id","MsgHelper",NotificationManager.IMPORTANCE_HIGH);
-            channel.enableLights(true);
-            channel.setLightColor(Color.RED);
-            channel.setShowBadge(true);
+                    new NotificationChannel(CHNL_ID,"UnReadMsg", NotificationManager.IMPORTANCE_HIGH);
+            channel.setSound(null,null);
+            //channel.enableLights(true);
+            //channel.setLightColor(Color.RED);
+            //channel.setShowBadge(true); // not work
             getNotiManager().createNotificationChannel(channel);
         }
 
         Intent intent1 = new Intent(this, MsgGroupActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this,0,intent1,0);
-        NotificationCompat.Builder builder= new NotificationCompat.Builder(this,"chnl_id");
-        builder.setContentTitle("未读消息");
-        builder.setContentText(str);
+        NotificationCompat.Builder builder= new NotificationCompat.Builder(this, CHNL_ID);
         builder.setPriority(NotificationManager.IMPORTANCE_HIGH);
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher));
+        //builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher));
         builder.setContentIntent(pi);
-
+        builder.setSound(null);
+        //builder.setContentTitle("未读消息");
+        //builder.setContentText(str);
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(str));
+        //builder.setNumber(10); // not work
         return builder.build();
-    }
-
-    private String getDefaultNotiContent(){
-        Map<String, Integer> groupMap = null;
-        groupMap = mDataAccess.aggregateMsgfromDB("msg_category", "is_read = 0");
-        int newOther = 0;
-        int newWorksheet = 0;
-
-        for (String key : groupMap.keySet()) {
-            if (key.equals("-1")){
-                newOther     = groupMap.get(key);
-            }else if (key.equals("2")){
-                newWorksheet = groupMap.get(key);
-            }else{
-                // 1-告警
-                // 0-初始化值，不可能有
-            }
-        }
-
-        groupMap = mDataAccess.aggregateMsgfromDB("al_level", "is_read = 0");
-        int newMajor = 0;
-        int newMinor = 0;
-        int newTrivial = 0;
-        int newClear = 0;
-
-        // 默认通知里只显示未读的主要/次要告警数量
-        for (String key : groupMap.keySet()) {
-            if (key.equals("1")){
-                newMajor = groupMap.get(key);
-            }else if (key.equals("2")){
-                newMinor = groupMap.get(key);
-            }else if (key.equals("3")){
-                newTrivial = groupMap.get(key);
-            }else if (key.equals("4")){
-                newClear = groupMap.get(key);
-            }else{
-            }
-        }
-
-        // 待优化，如果都是0，不应该发通知
-        String res = new String("主要: "+ newMajor + " 次要: " + newMinor
-                    + " 警告: " + newTrivial + " 工单: " + newWorksheet);
-        return res;
     }
 
     public void triggerReadSmsAsync(){
@@ -317,9 +282,14 @@ public class FgService extends Service {
         int badgeTrivial ;
         int badgeClear ;
 
-        String getString(){
-            String str = new String("主要: "+ badgeMajor + " 次要: " + badgeMinor
-                    + " 警告: " + badgeTrivial + " 工单: " + badgeWorksheet + " 其他: " + badgeOther);
+        int getWholeNumber(){
+            return badgeMajor + badgeMinor + badgeTrivial + badgeClear + badgeWorksheet + badgeOther;
+        }
+
+        public String getString(){
+            String str = new String("主: "+ badgeMajor + "  次: " + badgeMinor
+                    + "  警: " + badgeTrivial + " 清: " + badgeClear+ " 工: " + badgeWorksheet
+                    + "  其: " + badgeOther);
             return str;
         }
 
@@ -333,7 +303,7 @@ public class FgService extends Service {
                     && this.badgeMajor == ob.getBadgeMajor()
                     && this.badgeMinor == ob.getBadgeMinor()
                     && this.badgeTrivial == ob.getBadgeTrivial()
-                    //&& this.badgeClear == ob.getBadgeClear()
+                    && this.badgeClear == ob.getBadgeClear()
                    );
         }
 

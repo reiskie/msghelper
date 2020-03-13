@@ -7,6 +7,14 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" /> <!-- for MsgItem broadcast receiver -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!--
+    <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS"/>
+    -->
+    <!-- ShortcutBadger 必须要这个静态权限, 无需动态权限， 华为mate10 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
 
     <application
         android:name=".MsgApp"

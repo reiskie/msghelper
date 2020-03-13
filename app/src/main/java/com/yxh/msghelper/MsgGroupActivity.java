@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.leolin.shortcutbadger.ShortcutBadger;
 import q.rorbin.badgeview.Badge;
 import q.rorbin.badgeview.QBadgeView;
 
@@ -242,7 +243,8 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 startService(in);
             }
         }
-     }
+
+    }
 
      private void checkPermission(){
 
@@ -251,6 +253,10 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
              permissionNeeded.add(Manifest.permission.READ_SMS);     
              permissionNeeded.add(Manifest.permission.RECEIVE_SMS);  
              permissionNeeded.add(Manifest.permission.RECEIVE_BOOT_COMPLETED);
+             //permissionNeeded.add("com.huawei.android.launcher.permission.CHANGE_BADGE");
+             //permissionNeeded.add("com.huawei.android.launcher.permission.READ_SETTINGS");
+             //permissionNeeded.add("com.huawei.android.launcher.permission.WRITE_SETTINGS");
+             //permissionNeeded.add(Manifest.permission.INTERNET);
              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                  permissionNeeded.add(Manifest.permission.FOREGROUND_SERVICE);  
              }

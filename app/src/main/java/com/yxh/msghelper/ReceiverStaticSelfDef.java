@@ -16,7 +16,8 @@ public class ReceiverStaticSelfDef extends BroadcastReceiver {
         // an Intent broadcast.
         //throw new UnsupportedOperationException("Not yet implemented");
 
-        // work fine
+        // work fine on honor
+        // not work on mate10  --20200313 好像是高版本增加了自定义广播的权限
         // 接收自定义广播，以及飞行模式改变的广播
         Toast.makeText(context,
                 "ReceiverStaticSelfDef:onReceive intent.getAction()="+intent.getAction(),
