@@ -11,8 +11,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.BlendMode;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -23,19 +21,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.net.Uri;
-import android.os.Message;
-import android.os.Handler;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
 import org.litepal.LitePal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-import me.leolin.shortcutbadger.ShortcutBadger;
 import q.rorbin.badgeview.Badge;
 import q.rorbin.badgeview.QBadgeView;
 
@@ -117,6 +110,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         //return super.onOptionsItemSelected(item);
 
+        Intent in = null;
         switch (item.getItemId()){
             case R.id.manual_read_sms:
 
@@ -132,7 +126,8 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 }
                 break;
             case R.id.about:
-                Toast.makeText(this, "Thank you for using this app:)", Toast.LENGTH_LONG).show();
+                in = new Intent(this, ActivityAbout.class);
+                startActivity(in);
                 break;
              default:
         }

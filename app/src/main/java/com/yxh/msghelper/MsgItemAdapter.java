@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 //import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,7 +41,7 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.msg_item, parent,false);
+                .inflate(R.layout.msg_list_item, parent,false);
 
         final ViewHolder holder = new ViewHolder(view);
 
@@ -64,7 +63,7 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
                     Context context = MsgApp.getContext();
                     Intent in1 = new Intent(context, MsgBodyDiagActivity.class);
                     in1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    in1.putExtra("msg_item", item);
+                    in1.putExtra("msg_list_item", item);
                     //in1.putExtra("mode", "abstract");
                     in1.putExtra("mode", "detail");
                     context.startActivity(in1);

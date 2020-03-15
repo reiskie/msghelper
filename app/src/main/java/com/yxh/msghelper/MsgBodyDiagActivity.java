@@ -20,18 +20,18 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         //params.height =  WindowManager.LayoutParams.MATCH_PARENT; //对话框高度总是最大值
         //this.getWindow().setAttributes(params);
 
-        MsgItem item = (MsgItem)getIntent().getSerializableExtra("msg_item");
+        MsgItem item = (MsgItem)getIntent().getSerializableExtra("msg_list_item");
         TextView textBody = findViewById(R.id.text_body_full);
         textBody.setText(item.getBody());
         textBody.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         StringBuilder sb = new StringBuilder() ;
         sb.append("日期: " + item.getYear() + "-"+ item.getMon()+"-"+item.getDay());
-        sb.append(", 时间: " + item.getTime() + "\n");
+        sb.append(" 时间: " + item.getTime() + "\n");
         sb.append("号码: " + item.getAddress() + "\n");
         //sb.append(", 系统=" + item.getSystem());
         sb.append("分类: " + item.getMsg_category(true));
-        sb.append(", 级别: " + item.getAl_level(true));
+        sb.append(" 级别: " + item.getAl_level(true));
         if(getIntent().getStringExtra("mode").equals("detail")){
             sb.append("")
                     //.append(", raw_id=" + item.getRaw_id())

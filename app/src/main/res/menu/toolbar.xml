@@ -3,9 +3,8 @@
 
     <item
         android:id="@+id/manual_read_sms"
-        android:title="手动触发读取收件箱"
+        android:title="手动刷新"
         app:showAsAction="never"/>
-
     <item
         android:id="@+id/about"
         android:title="关于"
