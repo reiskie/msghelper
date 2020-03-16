@@ -11,6 +11,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.media.SoundPool;
+import android.media.VolumeShaper;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -39,6 +44,8 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
             isBinded = true;
         }
     };
+
+    SoundPool mSoundPool;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +84,9 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
         findViewById(R.id.btn_save_sms).setOnClickListener(this);
         findViewById(R.id.btn_read_sms).setOnClickListener(this);
         findViewById(R.id.btn_badge).setOnClickListener(this);
+        findViewById(R.id.btn_snd).setOnClickListener(this);
 
+        initSound();
 
     }
 
@@ -157,6 +166,9 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
                 ShortcutBadger.applyCount(this, (int)(Math.random()*100));
 
                 break;
+            case R.id.btn_snd:
+                playSound(R.raw.snd1);
+                break;
             default:
                 break;
         }
@@ -180,6 +192,8 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
         //stopService(in2);
 
         unregisterReceiver(receiverDyn); // 动态注册的receiver需要unregister
+
+        mSoundPool.release();
     }
 
     class ReceiverDyn extends BroadcastReceiver {
@@ -200,5 +214,50 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
 
             //abortBroadcast(); // 截断有序广播
         }
+    }
+
+    private void initSound(){
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            SoundPool.Builder builder = new SoundPool.Builder();
+            //传入音频的数量
+            builder.setMaxStreams(3);
+            //AudioAttributes是一个封装音频各种属性的类
+            AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
+            //设置音频流的合适属性
+            attrBuilder.setLegacyStreamType(AudioManager.STREAM_MUSIC);
+            builder.setAudioAttributes(attrBuilder.build());
+            mSoundPool = builder.build();
+        } else {
+            //第一个参数是可以支持的声音数量，第二个是声音类型，第三个是声音品质
+            mSoundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 5);
+        }
+
+
+    }
+
+    public void playSound(int resId) {
+
+        mSoundPool.load(this, resId, 1);
+        mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+
+                AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                //当前音量
+                int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                // 设置为最大值
+                int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
+                //第一个参数id，即传入池中的顺序，第二个和第三个参数为左右声道，第四个参数为优先级，第五个是否循环播放，0不循环，-1循环
+                //最后一个参数播放比率，范围0.5到2，通常为1表示正常播放
+                soundPool.play(1, 1, 1, 0, 0, 1);
+                // 恢复原值, 播放完成时才恢复，如何知道？
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+
+            }
+        });
+
+        //soundPool.release();
     }
 }

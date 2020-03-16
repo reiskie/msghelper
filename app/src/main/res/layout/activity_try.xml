@@ -104,4 +104,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="设置badge" />
+    <Button
+        android:id="@+id/btn_snd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="播放声音" />
 </LinearLayout>
