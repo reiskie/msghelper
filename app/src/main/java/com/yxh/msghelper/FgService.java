@@ -5,9 +5,13 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -33,6 +37,8 @@ public class FgService extends Service {
     private SMSContentObserver smsContentObserver;
     private FgBinder mBinder = this.new FgBinder();
     private NotificationValuesHolder lastHolder;
+    private SoundPool mSoundPool;
+    private boolean isSoundLoaded;
     private Handler mHandler = new Handler(new Handler.Callback() {
         public boolean  handleMessage(Message msg) {
             Log.i(TAG,"Handler:handleMessage():ThreadID = " + Thread.currentThread().getId());
@@ -85,6 +91,7 @@ public class FgService extends Service {
         mDataAccess = new DataAccess();
         startForeground(1, getNotification("信息监控中..."));
         registerContentObservers();
+        initSound();
     }
 
     private void registerContentObservers(){
@@ -157,7 +164,11 @@ public class FgService extends Service {
             //ShortcutBadger.applyNotification(this, notification, 100);
             getNotiManager().notify(1, notification);
             //getNotiManager().notify(2, getNotification(str));
-            // 每个ID一条通知
+            //test: 每个ID一条通知
+        }
+        if (lastHolder == null && holder.getBadgeMajor() > 0
+                || lastHolder != null && holder.isMajorIncreased(lastHolder)){
+            playSound();
         }
         lastHolder = holder;
     }
@@ -217,6 +228,12 @@ public class FgService extends Service {
         super.onDestroy();
         if (smsContentObserver != null) {
             getContentResolver().unregisterContentObserver(smsContentObserver);
+            smsContentObserver = null;
+        }
+        if (mSoundPool != null){
+            mSoundPool.release();
+            mSoundPool=null;
+            isSoundLoaded = false;
         }
     }
 
@@ -249,6 +266,12 @@ public class FgService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         Log.i(TAG,"onTaskRemoved: executed.");
+        if (mSoundPool != null){
+            mSoundPool.release();
+            mSoundPool = null;
+            isSoundLoaded = false;
+        }
+
         //https://android.stackexchange.com/questions/32697/what-is-the-offical-name-of-the-third-on-screen-button
         //Overview: Opens a list of thumbnail images of apps and Chrome tabs you’ve worked with recently.
         //          To open an app, touch it. To remove a thumbnail from the list, swipe it left or right.
@@ -307,6 +330,14 @@ public class FgService extends Service {
                    );
         }
 
+        public boolean isMajorIncreased(@Nullable Object obj) {
+            //return super.equals(obj);
+            NotificationValuesHolder ob=(NotificationValuesHolder) obj;
+            return (
+                    this.badgeMajor > ob.getBadgeMajor()
+            );
+        }
+
         public void setBadgeOther(int badgeOther) {
             this.badgeOther = badgeOther;
         }
@@ -356,4 +387,67 @@ public class FgService extends Service {
         }
     }
 
+
+    private void initSound(){
+        Log.i(TAG,"initSound() executed.");
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
+            attrBuilder.setLegacyStreamType(AudioManager.STREAM_MUSIC);
+            SoundPool.Builder builder = new SoundPool.Builder();
+            builder.setAudioAttributes(attrBuilder.build());
+            builder.setMaxStreams(3); //传入音频的最大数量
+            mSoundPool = builder.build();
+        } else {
+            //第一个参数是可以支持的声音数量，第二个是声音类型，第三个是声音品质
+            mSoundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 5);
+        }
+
+        mSoundPool.load(this, R.raw.snd1, 1);
+        mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                isSoundLoaded = true;
+            }
+        });
+    }
+
+    public void playSound() {
+
+        Log.i(TAG, "playSound(): mSoundPool="+mSoundPool +", isSoundLoaded="+isSoundLoaded);
+
+        if (mSoundPool == null || !isSoundLoaded){
+            return;
+        }
+
+        // 待优化 避免集中并发多次播放声音
+        // 提供开关，关闭声音播放
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                //当前音量
+                int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                //设置为最大值
+                int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
+                //第一个参数id，即传入池中的顺序，第二个和第三个参数为左右声道，第四个参数为优先级
+                //第五个是否循环播放，0不循环，-1循环
+                //第六个参数为播放比率，范围0.5到2，通常为1表示正常播放
+                mSoundPool.play(1, 1, 1, 0, 0, 1);
+
+                try{
+                        Thread.sleep(600);
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+
+                // 恢复原值, 播放完成时才恢复，如何知道？A: 无法知道
+                // 可以通过MediaPlayer获取duration，然后按时间等待
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+
+            }
+        }).start();
+    }
 }

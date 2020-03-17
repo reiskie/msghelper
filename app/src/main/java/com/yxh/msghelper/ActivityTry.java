@@ -219,18 +219,15 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
     private void initSound(){
 
         if (Build.VERSION.SDK_INT >= 21) {
-            SoundPool.Builder builder = new SoundPool.Builder();
-            //传入音频的数量
-            builder.setMaxStreams(3);
-            //AudioAttributes是一个封装音频各种属性的类
             AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
-            //设置音频流的合适属性
             attrBuilder.setLegacyStreamType(AudioManager.STREAM_MUSIC);
+            SoundPool.Builder builder = new SoundPool.Builder();
             builder.setAudioAttributes(attrBuilder.build());
+            builder.setMaxStreams(1); //传入音频的最大数量
             mSoundPool = builder.build();
         } else {
             //第一个参数是可以支持的声音数量，第二个是声音类型，第三个是声音品质
-            mSoundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 5);
+            mSoundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 5);
         }
 
 
@@ -246,13 +243,15 @@ public class ActivityTry extends AppCompatActivity implements View.OnClickListen
                 AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                 //当前音量
                 int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                // 设置为最大值
+                //设置为最大值
                 int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
-                //第一个参数id，即传入池中的顺序，第二个和第三个参数为左右声道，第四个参数为优先级，第五个是否循环播放，0不循环，-1循环
-                //最后一个参数播放比率，范围0.5到2，通常为1表示正常播放
+                //第一个参数id，即传入池中的顺序，第二个和第三个参数为左右声道，第四个参数为优先级
+                //第五个是否循环播放，0不循环，-1循环
+                //第六个参数为播放比率，范围0.5到2，通常为1表示正常播放
                 soundPool.play(1, 1, 1, 0, 0, 1);
-                // 恢复原值, 播放完成时才恢复，如何知道？
+                // 恢复原值, 播放完成时才恢复，如何知道？A: 无法知道
+                // 可以通过MediaPlayer获取duration，然后按时间等待
                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
 
             }
