@@ -1,6 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    <item
+        android:id="@+id/sound"
+        android:icon="@drawable/ic_volume_up_white"
+        android:title="响音"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/manual_read_sms"
         android:title="手动刷新"

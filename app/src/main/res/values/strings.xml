@@ -109,15 +109,26 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
     <string name="permission_statement">
-        "使用说明：\n"
-        "1. 请在设置->通知管理中，开启通知权限\n"
-        "2. 请在设置/手机管家中，设置允许自启动和后台活动\n\n"
+        "设置说明：\n"
+        "1. 在设置->通知管理中，开启通知权限\n"
+        "2. 在设置/手机管家中，允许自启动和后台活动\n\n"
 
-        "此APP使用权限如下：\n"
+        "手机权限使用列表：\n"
         "1. 读取/接收短信\n"
         "2. 开机启动\n"
         "3. 前台服务\n"
         "注，此APP不访问网络\n\n"
+
+        "开源组件使用列表：\n"
+        "1. badgeview\n"
+        "2. ShortcutBadger\n\n"
+
+        "版本更新记录：\n"
+        "0.4 xxx\n"
+        "0.3 xxx\n"
+        "0.2 xxx\n"
+        "0.1 xxx\n\n"
+
     </string>
     <string name="version">信息助手 版本: 0.4</string>
 

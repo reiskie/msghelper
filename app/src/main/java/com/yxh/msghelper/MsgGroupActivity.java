@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -112,6 +113,13 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
 
         Intent in = null;
         switch (item.getItemId()){
+            case R.id.sound:
+                if (mFgBinder.toggleMute()){
+                    item.setIcon(R.drawable.ic_volume_off_white);
+                }else{
+                    item.setIcon(R.drawable.ic_volume_up_white);
+                }
+                break;
             case R.id.manual_read_sms:
 
                 Log.i(TAG,"onOptionsItemSelected: manual trigger to read sms " );

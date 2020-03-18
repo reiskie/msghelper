@@ -39,6 +39,7 @@ public class FgService extends Service {
     private NotificationValuesHolder lastHolder;
     private SoundPool mSoundPool;
     private boolean isSoundLoaded;
+    private boolean isMute;
     private Handler mHandler = new Handler(new Handler.Callback() {
         public boolean  handleMessage(Message msg) {
             Log.i(TAG,"Handler:handleMessage():ThreadID = " + Thread.currentThread().getId());
@@ -62,6 +63,10 @@ public class FgService extends Service {
     });
 
     class FgBinder extends Binder {
+        public boolean toggleMute(){
+            FgService.this.isMute = !FgService.this.isMute;
+            return FgService.this.isMute;
+        }
 
         public void setGroupUpdater(MsgGroupActivity.ActivityGroupUpdater updater){
             groupUpdater = updater;
@@ -168,7 +173,9 @@ public class FgService extends Service {
         }
         if (lastHolder == null && holder.getBadgeMajor() > 0
                 || lastHolder != null && holder.isMajorIncreased(lastHolder)){
-            playSound();
+            if (!isMute){
+                playSound();
+            }
         }
         lastHolder = holder;
     }
