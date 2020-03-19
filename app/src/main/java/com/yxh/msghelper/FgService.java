@@ -24,7 +24,9 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -97,6 +99,7 @@ public class FgService extends Service {
         startForeground(1, getNotification("信息监控中..."));
         registerContentObservers();
         initSound();
+        checkTimeForSound();
     }
 
     private void registerContentObservers(){
@@ -173,7 +176,7 @@ public class FgService extends Service {
         }
         if (lastHolder == null && holder.getBadgeMajor() > 0
                 || lastHolder != null && holder.isMajorIncreased(lastHolder)){
-            if (!isMute){
+            if (!isMute && checkTimeForSound()){
                 playSound();
             }
         }
@@ -208,11 +211,23 @@ public class FgService extends Service {
         //builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher));
         builder.setContentIntent(pi);
         builder.setSound(null);
-        //builder.setContentTitle("未读消息");
+        //builder.setContentTitle("未读");
+        builder.setContentTitle(str);
         //builder.setContentText(str);
-        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(str));
+        //builder.setStyle(new NotificationCompat.BigTextStyle().bigText(str));
         //builder.setNumber(10); // not work
         return builder.build();
+    }
+
+    private boolean checkTimeForSound(){
+        boolean res = true;
+        SimpleDateFormat df = new SimpleDateFormat("HHmm");
+        int nowtime = Integer.parseInt(df.format(new Date()));
+
+        if (nowtime > 2300 || nowtime < 800){
+            res = false;
+        }
+        return res;
     }
 
     public void triggerReadSmsAsync(){

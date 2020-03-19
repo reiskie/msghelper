@@ -73,6 +73,9 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
         Button buttonread = findViewById(R.id.button_read);
         buttonread.setOnClickListener(this);
 
+        String label = getIntent().getStringExtra("label");
+        getSupportActionBar().setTitle(label);
+
         dataAccess = (DataAccess)getIntent().getSerializableExtra("dataAccess");
 
         itemList = dataAccess.getMsgfromDB(true);

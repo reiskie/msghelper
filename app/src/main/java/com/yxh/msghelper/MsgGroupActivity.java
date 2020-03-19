@@ -374,20 +374,25 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 da = new DataAccess();
                 in = new Intent(this, MsgListActivity.class);
                 in.putExtra("dataAccess", da);
+                in.putExtra("label", "全部");
                 startActivity(in);
                 break;
             case R.id.text_major:
-                da = new DataAccess(mDataAccess);
-                da.setAlertLevel(1);
-                in = new Intent(this, MsgListActivity.class);
-                in.putExtra("dataAccess", da);
-                startActivity(in);
+                if (! "0".equals(mTextMajor.getText())) {
+                    da = new DataAccess(mDataAccess);
+                    da.setAlertLevel(1);
+                    in = new Intent(this, MsgListActivity.class);
+                    in.putExtra("dataAccess", da);
+                    in.putExtra("label", "主要");
+                    startActivity(in);
+                }
                 break;
             case R.id.text_minor:
                 da = new DataAccess(mDataAccess);
                 da.setAlertLevel(2);
                 in = new Intent(this, MsgListActivity.class);
                 in.putExtra("dataAccess", da);
+                in.putExtra("label", "次要");
                 startActivity(in);
                 break;
             case R.id.text_trivial:
@@ -395,6 +400,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 da.setAlertLevel(3);
                 in = new Intent(this, MsgListActivity.class);
                 in.putExtra("dataAccess", da);
+                in.putExtra("label", "警告");
                 startActivity(in);
                 break;
             case R.id.text_clear:
@@ -402,18 +408,21 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 da.setAlertLevel(4);
                 in=new Intent(this, MsgListActivity.class);
                 in.putExtra("dataAccess", da);
+                in.putExtra("label", "清除");
                 startActivity(in);
             case R.id.text_worksheet:
                 da = new DataAccess(mDataAccess);
                 da.setCategory(2);
                 in=new Intent(this, MsgListActivity.class);
                 in.putExtra("dataAccess", da);
+                in.putExtra("label", "工单");
                 startActivity(in);
             case R.id.text_other:
                 da = new DataAccess(mDataAccess);
                 da.setCategory(-1);
                 in=new Intent(this, MsgListActivity.class);
                 in.putExtra("dataAccess", da);
+                in.putExtra("label", "其他");
                 startActivity(in);
                 break;
             default:
