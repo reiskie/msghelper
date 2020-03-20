@@ -9,18 +9,24 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 
 public class MsgBodyDiagActivity extends AppCompatActivity {
+    private static final String TAG = "MsgBodyDiagActivity";
     private PopupWindow mPopupWindow;
     private String mCopiedText;
+    private int lastX;
+    private int lastY;
     //private Button mBtn;
 
     @Override
@@ -39,13 +45,39 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         TextView textBody = findViewById(R.id.text_body_full);
         textBody.setText(item.getBody());
         textBody.setMovementMethod(ScrollingMovementMethod.getInstance());
-        textBody.setOnClickListener(new View.OnClickListener()  {
+        textBody.setOnLongClickListener(new View.OnLongClickListener(){
             @Override
-            public void onClick(View view) {
+            public boolean onLongClick(View v) {
+                Log.i(TAG, "onLongClick() executed.");
                 //mPopupWindow.showAsDropDown(view); // the popup shown under the textBody, not what I want
                 //mPopupWindow.showAtLocation(mBtn, Gravity.CENTER, 20, 20);  // from internet, this's confused that mBtn is here
-                mPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
-                mCopiedText = ((TextView) view).getText().toString();
+                //mPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+                mPopupWindow.showAtLocation(v,Gravity.LEFT|Gravity.TOP, lastX, lastY);
+                mCopiedText = ((TextView) v).getText().toString();
+                return false;
+            }
+        });
+        textBody.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //Log.i(TAG, "onTouch(): event="+ event.getAction());
+                //Log.i(TAG, "onTouch(): event.x="+ event.getX() + ", event.y=" + event.getY());
+
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        lastX = (int)event.getX();
+                        lastY = (int)event.getY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        break;
+                    default:
+                        break;
+                }
+                //PopupMenu s = new PopupMenu(MsgBodyDiagActivity.this, v);
+                //s.show();
+                return false;
             }
         });
 
