@@ -99,7 +99,6 @@ public class FgService extends Service {
         startForeground(1, getNotification("信息监控中..."));
         registerContentObservers();
         initSound();
-        checkTimeForSound();
     }
 
     private void registerContentObservers(){
@@ -220,10 +219,10 @@ public class FgService extends Service {
     }
 
     private boolean checkTimeForSound(){
+        Log.i(TAG,"checkTimeForSound: executed.");
         boolean res = true;
         SimpleDateFormat df = new SimpleDateFormat("HHmm");
         int nowtime = Integer.parseInt(df.format(new Date()));
-
         if (nowtime > 2300 || nowtime < 800){
             res = false;
         }
@@ -288,11 +287,7 @@ public class FgService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         Log.i(TAG,"onTaskRemoved: executed.");
-        if (mSoundPool != null){
-            mSoundPool.release();
-            mSoundPool = null;
-            isSoundLoaded = false;
-        }
+
 
         //https://android.stackexchange.com/questions/32697/what-is-the-offical-name-of-the-third-on-screen-button
         //Overview: Opens a list of thumbnail images of apps and Chrome tabs you’ve worked with recently.
