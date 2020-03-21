@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
@@ -44,6 +45,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
 
     private TextView mTextView1;
     private EditText mEditText1;
+    private TextView mTextTopTip;
 
     private TextView mTextMajor;
     private TextView mTextMinor;
@@ -51,6 +53,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
     private TextView mTextClear;
     private TextView mTextWorksheet;
     private TextView mTextOther;
+    private TextView mTextAll;
 
     private Badge mBadgeMajor;
     private Badge mBadgeMinor;
@@ -72,7 +75,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
             mFgBinder = (FgService.FgBinder)service;
             mFgBinder.setGroupUpdater(updater);
 
-            // 如果是新创建的活动，bing成功后触发一次异步读短信，后面会自动回调updater刷新ui
+            // 如果是新创建的活动，bind成功后触发一次异步读短信，后面会自动回调updater刷新ui
             // 因为活动销毁后，服务可能也挂了，没人去自动读取SMS
             if (isJustCreated){
                 mFgBinder.triggerReadSmsAsync();
@@ -133,8 +136,14 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                     refreshFixedGroup();
                 }
                 break;
+            case R.id.manual:
+                in = new Intent(this, ActivityAbout.class);
+                in.putExtra("mode", "manual");
+                startActivity(in);
+                break;
             case R.id.about:
                 in = new Intent(this, ActivityAbout.class);
+                in.putExtra("mode", "about");
                 startActivity(in);
                 break;
              default:
@@ -161,6 +170,9 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         mTextView1 = findViewById(R.id.text_1);
         mEditText1 = findViewById(R.id.edittext_1);
 
+        mTextTopTip = findViewById(R.id.text_top_tip);
+        mTextTopTip.setOnClickListener(this);
+
         mTextMajor = findViewById(R.id.text_major);
         mTextMajor.setOnClickListener(this);
         mTextMinor = findViewById(R.id.text_minor);
@@ -173,6 +185,8 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         mTextWorksheet.setOnClickListener(this);
         mTextOther = findViewById(R.id.text_other);
         mTextOther.setOnClickListener(this);
+        mTextAll = findViewById(R.id.text_all);
+        mTextAll.setOnClickListener(this);
 
         mBadgeMajor = new QBadgeView(this).bindTarget(mTextMajor);
         mBadgeMajor.setShowShadow(false);
@@ -424,6 +438,51 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 in.putExtra("dataAccess", da);
                 in.putExtra("label", "其他");
                 startActivity(in);
+                break;
+            case R.id.text_all:
+                da = new DataAccess();
+                in = new Intent(this, MsgListActivity.class);
+                in.putExtra("dataAccess", da);
+                in.putExtra("label", "全部");
+                startActivity(in);
+                break;
+            case R.id.text_top_tip:
+                PopupMenu popup = new PopupMenu(this, v);
+                popup.getMenuInflater().inflate(R.menu.popup_group_range, popup.getMenu());
+                popup.show(); // 不能控制位置
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item){
+                        long t1 = System.currentTimeMillis() - (1000*3600*24);
+                        switch (item.getItemId()){
+                            case R.id.range_4h:
+                                t1 = System.currentTimeMillis() - (1000*3600*4);
+                                mDataAccess.setLowerTime(t1);
+                                mTextTopTip.setText("近4小时信息概览");
+                                break;
+                            case R.id.range_7d:
+                                t1 = System.currentTimeMillis() - (1000L*3600*24*7);
+                                mDataAccess.setLowerTime(t1);
+                                mTextTopTip.setText("近7天信息概览");
+                                break;
+                            case R.id.range_30d:
+                                t1 = System.currentTimeMillis() - (1000L*3600*24*30);
+                                mDataAccess.setLowerTime(t1);
+                                mTextTopTip.setText("近30天信息概览");
+                                break;
+                            case R.id.range_24h:
+                            default:
+                                t1 = System.currentTimeMillis() - (1000*3600*24);
+                                mDataAccess.setLowerTime(t1);
+                                mTextTopTip.setText("近24小时信息概览");
+                                break;
+                        }
+                        // 修改了过滤条件，需要刷新UI
+                        refreshFixedGroup();
+                        return false;
+                    }
+                });
+
                 break;
             default:
                 break;

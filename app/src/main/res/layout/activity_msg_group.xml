@@ -31,6 +31,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
             android:orientation="vertical">
 
             <Button
@@ -38,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="启动实验界面"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/text_1"
@@ -68,16 +69,19 @@
                 android:layout_height="wrap_content"
                 android:text="查看全部信息"
                 android:textColor="#555555"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/text_top_tip"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
+                android:layout_gravity="center"
                 android:gravity="center"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:text="近24小时信息概览"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:visibility="visible" />
 
             <HorizontalScrollView
@@ -88,6 +92,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -233,6 +238,20 @@
                             android:textColor="#FFFFFF"
                             android:textSize="20sp" />
 
+                        <TextView
+                            android:id="@+id/text_all"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/text_all_bg"
+                            android:ellipsize="end"
+                            android:gravity="center"
+                            android:maxLines="1"
+                            android:text="All"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp" />
+
                     </LinearLayout>
 
                     <LinearLayout
@@ -259,6 +278,16 @@
                             android:gravity="center"
                             android:text="其他"
                             android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/text_all_bottom"
+                            android:layout_width="80dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:gravity="center"
+                            android:text="全部"
+                            android:textSize="16sp" />
+
                     </LinearLayout>
 
                 </LinearLayout>

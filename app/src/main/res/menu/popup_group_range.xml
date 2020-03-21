@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/range_4h"
+        android:title="最近4小时"/>
+    <item
+        android:id="@+id/range_24h"
+        android:title="最近24小时"/>
+    <item
+        android:id="@+id/range_7d"
+        android:title="最近7天"/>
+    <item
+        android:id="@+id/range_30d"
+        android:title="最近30天"/>
+
+</menu>

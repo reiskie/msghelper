@@ -34,6 +34,8 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_msg_body_diag);
 
+        Log.i(TAG, "onCreate() executed.");
+
         //WindowManager.LayoutParams params = this.getWindow().getAttributes();
         //params.x = -10;
         //params.height =  WindowManager.LayoutParams.MATCH_PARENT; //对话框高度总是最大值
@@ -76,7 +78,7 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
                         break;
                 }
                 //PopupMenu s = new PopupMenu(MsgBodyDiagActivity.this, v);
-                //s.show();
+                //s.show(); // 不能控制显示位置
                 return false;
             }
         });
@@ -102,6 +104,7 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
     }
 
     private void initPopupWindow() {
+        Log.i(TAG, "initPopupWindow() executed.");
 
         View popupView = getLayoutInflater().inflate(R.layout.popup_window, null);
         //View popupView = View.inflate(MsgBodyDiagActivity.this, R.layout.popup_window, null); // this also work
@@ -125,5 +128,27 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause() executed.");
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop() executed.");
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy() executed.");
+
+    }
+
 
 }

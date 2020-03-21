@@ -48,10 +48,11 @@
                 android:background="#52808080" />
 
             <TextView
+                android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="@string/permission_statement"
+                android:text="@string/about"
                 android:textSize="16sp" />
 
         </LinearLayout>

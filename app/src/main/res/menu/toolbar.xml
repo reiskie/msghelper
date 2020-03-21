@@ -10,6 +10,10 @@
         android:title="手动刷新"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/manual"
+        android:title="说明"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/about"
         android:title="关于"
         app:showAsAction="never"/>
