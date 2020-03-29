@@ -2,6 +2,7 @@ package com.yxh.msghelper;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         View itemView;
+        View linearHead;
+        View linearDigest;
         TextView itemAddress;
         TextView itemDate;
         TextView itemTag;
@@ -26,6 +29,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
         public ViewHolder(View view) {
             super(view);
             itemView    = view;
+            linearHead = view.findViewById(R.id.linear_head);
+            linearDigest = view.findViewById(R.id.linear_digest);
             itemAddress = view.findViewById(R.id.msg_address);
             itemDate    = view.findViewById(R.id.msg_date);
             itemTag     = view.findViewById(R.id.msg_tag);
@@ -80,10 +85,18 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
         MsgItem item = mMsgItemList.get(position);
         if (item.getInternal_flag() != 1){
             item.formatDate();
-            holder.itemDate.setText(item.getTime());
             holder.itemAddress.setText(item.getMon()+"月"+item.getDay()+"日");
-            holder.itemTag.setText("TAG");
+            holder.itemDate.setText(item.getTime());
+            if(item.getMsg_category() == 1 && item.getAl_level() < 4 && item.isIs_cleared()){
+                holder.itemTag.setText("可能已清除");
+                holder.linearHead.setBackgroundColor(0xFFC8E6C9);
+                holder.linearDigest.setBackgroundColor(0xFFC8E6C9);
+            }else{
+                holder.itemTag.setText("");
+            }
+
             holder.itemBody.setText(item.getBody());
+
         }else{
             holder.itemDate.setText("");
             holder.itemAddress.setText("");

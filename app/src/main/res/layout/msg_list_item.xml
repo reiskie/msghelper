@@ -10,6 +10,7 @@
         android:layout_marginTop="10dp"/>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/linear_head"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
@@ -21,21 +22,22 @@
             android:layout_gravity="left"
             android:layout_weight="1" />
         <TextView
-            android:id="@+id/msg_tag"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:layout_weight="1"
-            android:visibility="gone"/>
-        <TextView
             android:id="@+id/msg_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:layout_weight="1"
             android:gravity="left"/>
+        <TextView
+            android:id="@+id/msg_tag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_weight="1"
+            android:visibility="visible"/>
     </LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/linear_digest"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

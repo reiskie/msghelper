@@ -148,6 +148,12 @@ public class DataAccess implements Serializable {
         return t1;
     }
 
+    private static long getTimeBoundaryForRelateMsg(){
+        long t1 = System.currentTimeMillis() - (1000*3600*24);
+        //long t1 = 100; // for test
+        return t1;
+    }
+
     private static int getLastRawIdFromDB() {
         int last_raw_id = 0;
         MsgItem lastMsgItem = LitePal.findLast(MsgItem.class);
@@ -208,6 +214,9 @@ public class DataAccess implements Serializable {
                 msgItem.setDate(c.getLong(c.getColumnIndex("date")));
                 msgItem.setBody(c.getString(c.getColumnIndex("body")));
                 msgItem.extractInfo();
+                if (msgItem.getMsg_category() == 1 && msgItem.getAl_level() == 4){ // 清除告警
+                    tryRelateMsg(msgItem);
+                }
                 msgItem.save();
                 i++;
                 // for test
@@ -226,6 +235,46 @@ public class DataAccess implements Serializable {
         return i;
     }
 
+    public  static void tryRelateMsg(MsgItem msgItem){
+        Log.i(TAG, "tryRelateMsg() execute.");
+
+        List<MsgItem> result = null;
+        int last_min_raw_id = Integer.MAX_VALUE;
+        while (true){
+            result = LitePal
+                    .where("date > " + getTimeBoundaryForRelateMsg()
+                            + " and raw_id < " + last_min_raw_id
+                            + " and msg_category = 1 "     // 告警
+                            + " and al_level in (1,2,3) "  // 主/次/警
+                            + " and is_cleared = 0 "
+                            + " and rel_raw_id = 0 "
+                    )
+                    .order("id desc")
+                    .limit(20)
+                    .find(MsgItem.class);
+
+            Log.i(TAG, "tryRelateMsg: result.size() = " + result.size());
+
+            if  (result.size() > 0){
+                for (MsgItem item : result){
+                    if (MsgItem.compareMsgStr(item.getBody(), msgItem.getBody())) {
+                        item.setIs_cleared(true);
+                        item.setRel_raw_id(msgItem.getRaw_id());
+                        item.save();
+                        msgItem.setRel_raw_id(item.getRaw_id());
+                        break;
+                    }else{
+                        last_min_raw_id = item.getRaw_id();
+                    }
+                }
+                if (result.size() < 20){
+                    break;
+                }
+            }else{
+                break;
+            }
+        }
+    }
 
     // use LitePal
     // E.g.@github

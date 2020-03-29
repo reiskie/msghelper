@@ -86,7 +86,12 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder() ;
         sb.append("号码: " + item.getAddress() + "\n");
         sb.append("分类: " + item.getMsg_category(true));
-        sb.append(" 级别: " + item.getAl_level(true) + "\n");
+        sb.append(" 级别: " + item.getAl_level(true) );
+        if (item.getMsg_category() == 1 && item.getAl_level() < 4){
+            sb.append(item.isIs_cleared() ? " 可能已清除\n" : " 可能未清除\n");
+        }else{
+            sb.append("\n");
+        }
         sb.append("日期: " + item.getYear() + "-"+ item.getMon()+"-"+item.getDay());
         sb.append(" 时间: " + item.getTime() + "");
         //sb.append(", 系统=" + item.getSystem());
@@ -96,7 +101,6 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
                     //.append(", thread_id=" + item.getThread_id())
                     //.append(", source=" + item.getMsg_srouce())
                     //.append(", is_read=" + item.isIs_read())
-                    //.append(", is_cleared=" + item.isIs_cleared())
             ;
         }
         TextView textHead = findViewById(R.id.text_header);

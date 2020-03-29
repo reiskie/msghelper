@@ -1,10 +1,15 @@
 package com.yxh.msghelper;
 
+import android.util.Log;
+
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
 数据库中字段的顺序，按字母排序的:
@@ -24,6 +29,8 @@ thread_id integer);
  */
 
 public class MsgItem extends LitePalSupport implements Serializable {
+    private static final String TAG = "MsgItem";
+
     // fields from sms-inbox
     private int raw_id; // for _id
     private int thread_id;
@@ -45,6 +52,7 @@ public class MsgItem extends LitePalSupport implements Serializable {
     //private String al_type; // 告警种类: 状态类，性能类，容量类，错误提示类，应用日志监控
     private String system; // 系统，仅对告警提取system
     //private String sys_level; // 系统级别，告警内容里有
+    private int rel_raw_id; // 关联信息ID，例如清除短信的ID
 
     @Column(ignore = true)
     private String day;
@@ -252,5 +260,135 @@ public class MsgItem extends LitePalSupport implements Serializable {
 
     public String getTime() {
         return time;
+    }
+
+    public int getRel_raw_id() {return rel_raw_id;}
+
+    public void setRel_raw_id(int rel_raw_id) {this.rel_raw_id = rel_raw_id; }
+
+
+    public static boolean compareMsgStr(String strAlert, String strClear) {
+        boolean result = false;
+        Log.i(TAG, "compareMsgStr() execute.");
+
+        try {
+
+            if (strAlert.contains("AlphaOps")) {
+                checkAlphaOps(strAlert, strClear);
+                return false;
+            }
+
+            ArrayList listAlert = getThings(strAlert);
+            Log.i(TAG,"compareMsgStr: ============[CLEAR]=============");
+            ArrayList listClear = getThings(strClear);
+
+            if (listAlert == null || listClear == null ||
+                    "".equals(listAlert.get(0)) || "".equals(listAlert.get(0)) ||
+                    "".equals(listClear.get(2)) || "".equals(listClear.get(2)) ) {
+                return false;
+            }
+
+            if (listAlert.get(0).equals(listClear.get(0)) &&
+                    listAlert.get(2).equals(listClear.get(2)) ) {
+                Log.i(TAG,"compareMsgStr: $$$***### 比对成功!");
+                result = true;
+            }
+
+        }catch(Exception e) {
+            Log.i(TAG,"compareMsgStr: catch exception");
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    // return a list as [beginStr, sysName, content, IP]
+    private static ArrayList getThings(String body) {
+        Log.i(TAG, "getThings() execute.");
+
+        ArrayList list = new ArrayList<String>();
+
+        // 级][错误提示类]集成开放平台:生产系统:BS-448:告
+        // [A级][状态类][Linux]PE系统:生产系统:MPEDB04A(40.
+        // [A级][Linux] 生产系统:PE系统_MPEDB04A_监控代理程
+        // [A级][硬件类][Linux]PE系统:生产系统:MPEDB0
+        // A级][硬件类][Linux] PE系统:生产系统:MPEDB
+        // [B级][性能类][NT]外汇清算:生产系统:MFCLSVR1(40.3
+        // [A级][错误提示类]NPS系统:生产系统:MNPSAPP1:告警
+        // [A级][错误提示类]NPS系统:生产系统:MNPSAPP1:告警内
+        // 状态类][应用日志监控]PE系统:生产系统:MPEAP
+        // 状态类][应用日志监控]PE系统:生产系统:MPEAP
+        // [AlphaOps 告警]【次要告警】【NPS系统-cardStatus
+
+        // get beginStr
+        //Log.i(TAG,"getThings: ###### find beginStr #####");
+        int pos1 = body.indexOf("生产系统:");
+        if (pos1 == -1) {
+            return null;
+        }
+        String beginStr = body.substring(0, pos1);
+        Log.i(TAG,"getThings: beginStr=" + beginStr);
+        //让"主要|次要|警告" == "清除"
+        beginStr=beginStr.replaceFirst("(]主要告警|]次要告警|]警告告警|]清除告警)", "]告警");
+        Log.i(TAG,"getThings: beginStr=" + beginStr);
+        list.add(beginStr);
+
+        // get sysName
+        //Log.i(TAG,"getThings: ###### find sysName #####");
+        String sysName = "";
+        int pos0 = body.lastIndexOf(']', pos1);
+        //Log.i(TAG,"getThings: pos0=" + pos0 + ", pos1=" + pos1);
+        if (pos1-1 >= pos0+1) {
+            sysName = body.substring(pos0 + 1, pos1-1);
+        }else if (pos1 >= pos0+1) {
+            sysName = body.substring(pos0 + 1, pos1);
+        }
+        Log.i(TAG,"getThings: sysName=" + sysName);
+        list.add(sysName);
+
+        // get content
+        //Log.i(TAG,"getThings: ###### find content #####");
+        int contentBgn = pos1 + 5; // bypass 生产系统:
+        String content = body.substring(contentBgn);
+
+        String pattern="(发生时间|当前值|异常，已发生报错|成功解除)";
+        Pattern p=Pattern.compile(pattern);
+        Matcher m=p.matcher(content);
+        if (m.find()) {
+            //Log.i(TAG,"m.groupCount(): "+m.groupCount());
+            Log.i(TAG,"getThings: Found Boundary: "+ m.group(0));
+            //Log.i(TAG,"start()="+m.start() + ", end()="+m.end());
+            content = content.substring(0, m.start());
+        }else {
+            Log.i(TAG,"getThings: Boundary not found.");
+        }
+        Log.i(TAG,"getThings: content=" + content);
+        list.add(content);
+
+        // get IP
+        //Log.i(TAG,"getThings: ###### find ip addr #####");
+        String IP="";
+        String REGEX_IP0 = "((?:(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d))";
+        p=Pattern.compile(REGEX_IP0);
+        m=p.matcher(content);
+        if (m.find()) {
+            //Log.i(TAG,"m.groupCount(): "+m.groupCount());
+            Log.i(TAG,"getThings: Found IP: "+ m.group(0));
+            //Log.i(TAG,"start()="+m.start() + ", end()="+m.end());
+            IP = m.group(0);
+
+        }else {
+            Log.i(TAG,"getThings: IP not found.");
+        }
+        list.add(IP);
+
+        return list;
+    }
+
+
+    private static void checkAlphaOps(String strAlert, String strClear) {
+
+        Log.i(TAG,"checkAlphaOps: AlphaOps is found.");
+
     }
 }
