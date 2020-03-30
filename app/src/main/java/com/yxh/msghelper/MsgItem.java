@@ -329,7 +329,7 @@ public class MsgItem extends LitePalSupport implements Serializable {
         String beginStr = body.substring(0, pos1);
         Log.i(TAG,"getThings: beginStr=" + beginStr);
         //让"主要|次要|警告" == "清除"
-        beginStr=beginStr.replaceFirst("(]主要告警|]次要告警|]警告告警|]清除告警)", "]告警");
+        beginStr=beginStr.replaceFirst("(主要告警|次要告警|警告告警|清除告警)", "告警");
         Log.i(TAG,"getThings: beginStr=" + beginStr);
         list.add(beginStr);
 
@@ -351,7 +351,7 @@ public class MsgItem extends LitePalSupport implements Serializable {
         int contentBgn = pos1 + 5; // bypass 生产系统:
         String content = body.substring(contentBgn);
 
-        String pattern="(发生时间|当前值|异常，已发生报错|成功解除)";
+        String pattern="(发生时间|当前值|异常,|异常，|异常:|异常：|成功解除,|成功解除，)";
         Pattern p=Pattern.compile(pattern);
         Matcher m=p.matcher(content);
         if (m.find()) {

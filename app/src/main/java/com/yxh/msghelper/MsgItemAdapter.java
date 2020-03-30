@@ -89,8 +89,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
             holder.itemDate.setText(item.getTime());
             if(item.getMsg_category() == 1 && item.getAl_level() < 4 && item.isIs_cleared()){
                 holder.itemTag.setText("可能已清除");
-                holder.linearHead.setBackgroundColor(0xFFC8E6C9);
-                holder.linearDigest.setBackgroundColor(0xFFC8E6C9);
+                holder.linearHead.setBackgroundColor(0xFFE8F5E9);
+                holder.linearDigest.setBackgroundColor(0xFFE8F5E9);
             }else{
                 holder.itemTag.setText("");
             }
