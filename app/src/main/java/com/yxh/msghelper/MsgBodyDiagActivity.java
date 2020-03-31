@@ -44,8 +44,27 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         initPopupWindow();
 
         MsgItem item = (MsgItem)getIntent().getSerializableExtra("msg_list_item");
-        TextView textBody = findViewById(R.id.text_body_full);
+        TextView textBody1 = findViewById(R.id.text_body_full);
+        TextView textHead1 = findViewById(R.id.text_header);
+        View view1 = findViewById(R.id.linear_1);
+        fillText(textBody1, textHead1, view1, item);
+
+        MsgItem item2 = DataAccess.findRelatedMsg(item);
+        if (item2 != null){
+            TextView textBody2 = findViewById(R.id.text_body_full2);
+            TextView textHead2 = findViewById(R.id.text_header2);
+            View view2 = findViewById(R.id.linear_2);
+            fillText(textBody2, textHead2, view2, item2);
+            findViewById(R.id.linear_2).setVisibility(View.VISIBLE);
+        }
+
+
+    }
+
+    private void fillText(TextView textBody, TextView textHead, View view, MsgItem item){
+
         textBody.setText(item.getBody());
+
         textBody.setMovementMethod(ScrollingMovementMethod.getInstance());
         textBody.setOnLongClickListener(new View.OnLongClickListener(){
             @Override
@@ -83,28 +102,29 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
             }
         });
 
+
         StringBuilder sb = new StringBuilder() ;
-        sb.append("号码: " + item.getAddress() + "\n");
+        sb.append("号码: " + item.getAddress() );
+        sb.append("\n");
+
         sb.append("分类: " + item.getMsg_category(true));
-        sb.append(" 级别: " + item.getAl_level(true) );
-        if (item.getMsg_category() == 1 && item.getAl_level() < 4){
-            sb.append(item.isIs_cleared() ? " 可能已清除\n" : " 可能未清除\n");
-        }else{
-            sb.append("\n");
+        if (item.getAl_level() > 0 ){
+            sb.append("  级别: " + item.getAl_level(true) );
         }
+        if (item.getMsg_category() == 1 && item.isIs_cleared()){
+            sb.append("  已关联清除");
+            view.setBackgroundColor(0xFFE8F5E9);
+        }
+        sb.append("\n");
+
         sb.append("日期: " + item.getYear() + "-"+ item.getMon()+"-"+item.getDay());
-        sb.append(" 时间: " + item.getTime() + "");
+        sb.append("  时间: " + item.getTime() + "");
         //sb.append(", 系统=" + item.getSystem());
-        if(getIntent().getStringExtra("mode").equals("detail")){
-            sb.append("")
-                    //.append(", raw_id=" + item.getRaw_id())
-                    //.append(", thread_id=" + item.getThread_id())
-                    //.append(", source=" + item.getMsg_srouce())
-                    //.append(", is_read=" + item.isIs_read())
-            ;
-        }
-        TextView textHead = findViewById(R.id.text_header);
+        //if(getIntent().getStringExtra("mode").equals("detail")){
+        //    ;
+        //}
         textHead.setText(sb.toString());
+
     }
 
     private void initPopupWindow() {

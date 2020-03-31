@@ -61,12 +61,12 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
 
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshMsg();
-            }
-        });
+        //swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        //    @Override
+        //    public void onRefresh() {
+        //        refreshMsg();
+        //    }
+        //});
 
         Button button3 = findViewById(R.id.button_finish);
         button3.setOnClickListener(this);

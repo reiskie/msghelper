@@ -3,6 +3,7 @@ package com.yxh.msghelper;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.fonts.FontStyle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +22,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
         View itemView;
         View linearHead;
         View linearDigest;
-        TextView itemAddress;
         TextView itemDate;
+        TextView itemTime;
         TextView itemTag;
         TextView itemBody;
 
@@ -31,8 +32,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
             itemView    = view;
             linearHead = view.findViewById(R.id.linear_head);
             linearDigest = view.findViewById(R.id.linear_digest);
-            itemAddress = view.findViewById(R.id.msg_address);
             itemDate    = view.findViewById(R.id.msg_date);
+            itemTime = view.findViewById(R.id.msg_time);
             itemTag     = view.findViewById(R.id.msg_tag);
             itemBody    = view.findViewById(R.id.msg_body);
         }
@@ -82,16 +83,22 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+
         MsgItem item = mMsgItemList.get(position);
+
         if (item.getInternal_flag() != 1){
-            item.formatDate();
-            holder.itemAddress.setText(item.getMon()+"月"+item.getDay()+"日");
-            holder.itemDate.setText(item.getTime());
-            if(item.getMsg_category() == 1 && item.getAl_level() < 4 && item.isIs_cleared()){
-                holder.itemTag.setText("可能已清除");
+
+            holder.itemDate.setText(item.getMon()+"月"+item.getDay()+"日");
+            holder.itemTime.setText(item.getTime());
+
+            if(item.getMsg_category() == 1 && item.isIs_cleared()){
+                holder.itemTag.setText("已关联清除");
                 holder.linearHead.setBackgroundColor(0xFFE8F5E9);
                 holder.linearDigest.setBackgroundColor(0xFFE8F5E9);
-            }else{
+            }else if(item.getMsg_category() == 1 && item.getAl_level() == 4 && item.getRel_raw_id()>0){
+                holder.itemTag.setText("已关联");
+            }
+            else{
                 holder.itemTag.setText("");
             }
 
@@ -99,7 +106,7 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
 
         }else{
             holder.itemDate.setText("");
-            holder.itemAddress.setText("");
+            holder.itemTime.setText("");
             holder.itemTag.setText("");
             holder.itemBody.setText("");
             //holder.itemBody.setVisibility(View.GONE);

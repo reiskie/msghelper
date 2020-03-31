@@ -276,6 +276,22 @@ public class DataAccess implements Serializable {
         }
     }
 
+    public static MsgItem findRelatedMsg(MsgItem item){
+
+        MsgItem item1 = null;
+
+        long boundary = item.getDate() - (1000*3600*24);
+
+        item1 = LitePal
+                .where("date > " + boundary
+                        + " and msg_category = 1 "     // 告警
+                        + " and rel_raw_id =  " + item.getRaw_id()
+                )
+                .findFirst(MsgItem.class);
+
+        return item1;
+    }
+
     // use LitePal
     // E.g.@github
     // List<Song> songs = LitePal.where("name like ? and duration < ?", "song%", "200").order("duration").find(Song.class);

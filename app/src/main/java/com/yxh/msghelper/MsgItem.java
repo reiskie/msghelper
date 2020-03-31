@@ -112,7 +112,7 @@ public class MsgItem extends LitePalSupport implements Serializable {
 
     }
 
-    public void formatDate() {
+    private void formatDate() {
         if (day == null)
         {
             this.day = new SimpleDateFormat("dd").format(this.date);
@@ -227,6 +227,9 @@ public class MsgItem extends LitePalSupport implements Serializable {
             case 3:
                 sLevel = "警告";
                 break;
+            case 4:
+                sLevel = "清除";
+                break;
             default:
                 sLevel = "未知";
                 break;
@@ -247,18 +250,31 @@ public class MsgItem extends LitePalSupport implements Serializable {
     }
 
     public String getDay() {
+        if (day == null && date>0){
+            formatDate();
+        }
         return day;
     }
 
     public String getMon() {
+        if (mon == null && date>0){
+            formatDate();
+        }
         return mon;
     }
 
     public String getYear() {
+        if (year == null && date>0){
+            formatDate();
+        }
         return year;
     }
 
     public String getTime() {
+
+        if (time == null && date>0){
+            formatDate();
+        }
         return time;
     }
 
