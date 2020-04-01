@@ -20,9 +20,11 @@ public class ActivityAbout extends AppCompatActivity {
         TextView tv = findViewById(R.id.content);
         switch (mode){
             case "about":
+                getSupportActionBar().setTitle("关于");
                 tv.setText(R.string.about);
                 break;
             case "manual":
+                getSupportActionBar().setTitle("说明");
                 tv.setText(R.string.manual);
                 break;
             default:

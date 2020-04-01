@@ -61,12 +61,12 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
 
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        //swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-        //    @Override
-        //    public void onRefresh() {
-        //        refreshMsg();
-        //    }
-        //});
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshMsg();
+            }
+        });
 
         Button button3 = findViewById(R.id.button_finish);
         button3.setOnClickListener(this);
@@ -133,7 +133,7 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
             public void run() {
                 try{
                     // re-read the itemList
-                    Thread.sleep(500);
+                    Thread.sleep(200);
 
                 }catch (InterruptedException e){
                     e.printStackTrace();
@@ -141,11 +141,11 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        List<MsgItem> t = dataAccess.getMsgfromDB(true);
-                        //itemList.addAll(t);
-                        //itemList.remove(1);
-                        //mAdapter.notifyDataSetChanged();
-                        //recyclerView.scrollToPosition(itemList.size()-1);
+                        //List<MsgItem> t = dataAccess.getMsgfromDB(true);
+                        ////itemList.addAll(t);
+                        ////itemList.remove(1);
+                        ////mAdapter.notifyDataSetChanged();
+                        ////recyclerView.scrollToPosition(itemList.size()-1);
                         recyclerView.scrollToPosition(0);
                         swipeRefresh.setRefreshing(false);
                     }

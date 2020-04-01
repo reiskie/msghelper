@@ -92,9 +92,14 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
             holder.itemTime.setText(item.getTime());
 
             if(item.getMsg_category() == 1 && item.isIs_cleared()){
-                holder.itemTag.setText("已关联清除");
-                holder.linearHead.setBackgroundColor(0xFFE8F5E9);
-                holder.linearDigest.setBackgroundColor(0xFFE8F5E9);
+                holder.itemTag.setText("已关联");
+                //设置LinearLayout的背景色，当列表很长时显示有bug，没设置颜色的行，也会显示颜色
+                //holder.linearHead.setBackgroundColor(0xFFE8F5E9);
+                //holder.linearDigest.setBackgroundColor(0xFFE8F5E9);
+                holder.itemDate.setBackgroundColor(0xFFE8F5E9);
+                holder.itemTime.setBackgroundColor(0xFFE8F5E9);
+                holder.itemTag.setBackgroundColor(0xFFE8F5E9);
+                holder.itemBody.setBackgroundColor(0xFFE8F5E9);
             }else if(item.getMsg_category() == 1 && item.getAl_level() == 4 && item.getRel_raw_id()>0){
                 holder.itemTag.setText("已关联");
             }

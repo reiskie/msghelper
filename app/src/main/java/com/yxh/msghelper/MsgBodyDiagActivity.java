@@ -112,7 +112,7 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
             sb.append("  级别: " + item.getAl_level(true) );
         }
         if (item.getMsg_category() == 1 && item.isIs_cleared()){
-            sb.append("  已关联清除");
+            sb.append("  已关联");
             view.setBackgroundColor(0xFFE8F5E9);
         }
         sb.append("\n");

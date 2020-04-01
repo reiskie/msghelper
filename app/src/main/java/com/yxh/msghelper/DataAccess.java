@@ -2,7 +2,6 @@ package com.yxh.msghelper;
 
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import org.litepal.LitePal;
@@ -132,12 +131,12 @@ public class DataAccess implements Serializable {
         return zero;
     }
 
-    private static long getEarlistTimeFromConfig(){
+    private static long getEarliestTimeForReadingInbox(){
         //now is 24 hours. it should depend on configuration
         // if user change this config to a earlier time,
         //   we should check whether this new time is earlier than the first one in db.
         //   if so, might want to clear table in db and reload all.
-        long t1 = System.currentTimeMillis() - (1000*3600*24);
+        long t1 = System.currentTimeMillis() - (1000L*3600*24);
         //long t1 = 100; // for test
         return t1;
     }
@@ -189,7 +188,7 @@ public class DataAccess implements Serializable {
         int last_raw_id = getLastRawIdFromDB();
         if (last_raw_id == 0){ // empty table
             sb.append(" and date > ? ");
-            argsList.add(Long.toString(DataAccess.getEarlistTimeFromConfig()));
+            argsList.add(Long.toString(DataAccess.getEarliestTimeForReadingInbox()));
         }else{
             sb.append(" and _id > ?  ");
             argsList.add(Integer.toString(last_raw_id));
