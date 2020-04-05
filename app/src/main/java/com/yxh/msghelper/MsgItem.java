@@ -53,6 +53,7 @@ public class MsgItem extends LitePalSupport implements Serializable {
     private String system; // 系统，仅对告警提取system
     //private String sys_level; // 系统级别，告警内容里有
     private int rel_raw_id; // 关联信息ID，例如清除短信的ID
+    private int sim_perc; // 文本相似度百分比, 范围0-100
 
     @Column(ignore = true)
     private String day;
@@ -282,43 +283,72 @@ public class MsgItem extends LitePalSupport implements Serializable {
 
     public void setRel_raw_id(int rel_raw_id) {this.rel_raw_id = rel_raw_id; }
 
+    public int getSim_perc() {return sim_perc; }
+    public String getSim_perc(boolean flag) {
+        String res="";
+        if (sim_perc>0 && sim_perc<100)
+            res = Integer.valueOf(sim_perc)+"%";
+        return res;
+    }
+    public void setSim_perc(int sim_perc) {this.sim_perc = sim_perc; }
 
-    public static boolean compareMsgStr(String strAlert, String strClear) {
-        boolean result = false;
+
+    // return:
+    //  0       不匹配
+    // (0,100)  相似度%
+    // 100      匹配
+    public static int compareMsgStr(String strAlert, String strClear) {
+        int result = 0;
         Log.i(TAG, "compareMsgStr() execute.");
 
         try {
-
-            if (strAlert.contains("AlphaOps")) {
-                checkAlphaOps(strAlert, strClear);
-                return false;
+            // special logic for alphaOps
+            if (strClear.contains("AlphaOps")) {
+                if (strAlert.contains("AlphaOps")) {
+                    return (checkAlphaOps(strAlert, strClear) ? 100:0);
+                }else{
+                    return 0;
+                }
+            }else{
+                if (strAlert.contains("AlphaOps")) {
+                    return 0;
+                }
             }
 
+            // the content of list: [beginStr, sysName, content, hostname, IP]
             ArrayList listAlert = getThings(strAlert);
             Log.i(TAG,"compareMsgStr: ============[CLEAR]=============");
             ArrayList listClear = getThings(strClear);
 
             if (listAlert == null || listClear == null ||
+                    listAlert.size()<5 || listClear.size()<5 ||
                     "".equals(listAlert.get(0)) || "".equals(listAlert.get(0)) ||
                     "".equals(listClear.get(2)) || "".equals(listClear.get(2)) ) {
-                return false;
+                return 0;
             }
 
+            // check the beginStr and content
             if (listAlert.get(0).equals(listClear.get(0)) &&
-                    listAlert.get(2).equals(listClear.get(2)) ) {
-                Log.i(TAG,"compareMsgStr: $$$***### 比对成功!");
-                result = true;
+                listAlert.get(2).equals(listClear.get(2)) ) {
+                result = 100;
+                Log.i(TAG,"compareMsgStr: $$$***### 比对成功! result = " + result);
+            }else if (listAlert.get(0).equals(listClear.get(0)) &&
+                      listAlert.get(3).equals(listClear.get(3) ) ){
+                // if have same beginStr and hostname
+                // then get similarity of content
+                result = UtilSimHash.getSimilarityPercent((String)listAlert.get(2), (String)listClear.get(2));
+                Log.i(TAG,"compareMsgStr: similarity=" + result + "%");
             }
-
         }catch(Exception e) {
             Log.i(TAG,"compareMsgStr: catch exception");
+            result = 0;
             e.printStackTrace();
         }
 
         return result;
     }
 
-    // return a list as [beginStr, sysName, content, IP]
+    // return a list as [beginStr, sysName, content, hostname, IP]
     private static ArrayList getThings(String body) {
         Log.i(TAG, "getThings() execute.");
 
@@ -362,11 +392,12 @@ public class MsgItem extends LitePalSupport implements Serializable {
         Log.i(TAG,"getThings: sysName=" + sysName);
         list.add(sysName);
 
-        // get content
+        // get content by boundary string
         //Log.i(TAG,"getThings: ###### find content #####");
         int contentBgn = pos1 + 5; // bypass 生产系统:
         String content = body.substring(contentBgn);
 
+        // this is the boundary string
         String pattern="(发生时间|当前值|异常,|异常，|异常:|异常：|成功解除,|成功解除，)";
         Pattern p=Pattern.compile(pattern);
         Matcher m=p.matcher(content);
@@ -380,6 +411,17 @@ public class MsgItem extends LitePalSupport implements Serializable {
         }
         Log.i(TAG,"getThings: content=" + content);
         list.add(content);
+
+        // get thing just after "生产系统:", it might be hostname/BS-448/PE系统/MPEDB04A设备
+        String hostName = "";
+        pattern = "(:|\\(|_|设备)";
+        p=Pattern.compile(pattern);
+        m=p.matcher(content);
+        if (m.find()) {
+            hostName = content.substring(0, m.start());
+        }
+        Log.i(TAG,"getThings: hostName=" + hostName);
+        list.add(hostName);
 
         // get IP
         //Log.i(TAG,"getThings: ###### find ip addr #####");
@@ -402,9 +444,42 @@ public class MsgItem extends LitePalSupport implements Serializable {
     }
 
 
-    private static void checkAlphaOps(String strAlert, String strClear) {
+    private static boolean checkAlphaOps(String strAlert, String strClear) {
 
         Log.i(TAG,"checkAlphaOps: AlphaOps is found.");
+        //【民生银行】[新]警告告警[AlphaOps 告警]【次要告警】【PE系统-F5_PE系统】，异常点开始时间：2020/04/03 10:00。异常指标：【响应时间0.41s|高于0.38及以下范围】。
+        //【民生银行】[新]清除告警[AlphaOps 告警]【告警解除】【PE系统-F5_PE系统】，【响应时间高于正常值】的告警已解除，
 
+        //【民生银行】[NEW]警告告警[AlphaOps 告警]【次要告警】【NPS系统-cardStatusCheck服务】，异常点开始时间：2020/03/25 18:43。异常指标：【交易量119笔|高于正常范围0-47】。
+        //【民生银行】[NEW]清除告警[AlphaOps 告警]【告警解除】【NPS系统-cardStatusCheck服务】，【交易量高于正常值】的告警已解除，
+
+        boolean result = false;
+        String beginAlert = null;
+        String beginClear = null;
+        String termAlert = null;
+        String termClear = null;
+
+        String body = strAlert.replaceAll("(主要告警|次要告警|警告告警|清除告警|告警解除)", "");
+        beginAlert = body.substring(0, body.indexOf("】，异常点"));
+        int pos = body.indexOf("异常指标：【");
+        termAlert  = body.substring(pos + 6, pos + 6 + 3);
+
+        body = strClear.replaceAll("(主要告警|次要告警|警告告警|清除告警|告警解除)", "");
+        beginClear = body.substring(0, body.indexOf("】，【"));
+        pos = body.indexOf("】，【");
+        termClear  = body.substring(pos + 3, pos +3 + 3);
+
+        Log.i(TAG,"beginAlert=" + beginAlert);
+        Log.i(TAG,"beginClear=" + beginClear);
+        Log.i(TAG,"termAlert =" + termAlert);
+        Log.i(TAG,"termClear =" + termClear);
+
+        if (beginAlert != null && termAlert  != null &&
+                beginAlert.equals(beginClear) && termAlert.equals(termClear)) {
+            Log.i(TAG,"$$$***### AlphaOps 比对成功!");
+            result = true;
+        }
+
+        return result;
     }
 }

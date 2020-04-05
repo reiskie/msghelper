@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -46,19 +47,22 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         MsgItem item = (MsgItem)getIntent().getSerializableExtra("msg_list_item");
         TextView textBody1 = findViewById(R.id.text_body_full);
         TextView textHead1 = findViewById(R.id.text_header);
-        View view1 = findViewById(R.id.linear_1);
+        LinearLayout view1 = findViewById(R.id.linear_1);
         fillText(textBody1, textHead1, view1, item);
 
         MsgItem item2 = DataAccess.findRelatedMsg(item);
         if (item2 != null){
             TextView textBody2 = findViewById(R.id.text_body_full2);
             TextView textHead2 = findViewById(R.id.text_header2);
-            View view2 = findViewById(R.id.linear_2);
+            LinearLayout view2 = findViewById(R.id.linear_2);
+            view2.setVisibility(View.VISIBLE);
             fillText(textBody2, textHead2, view2, item2);
-            findViewById(R.id.linear_2).setVisibility(View.VISIBLE);
+
+            if (!item2.isIs_read()){
+                item2.setIs_read(true);
+                item2.save();
+            }
         }
-
-
     }
 
     private void fillText(TextView textBody, TextView textHead, View view, MsgItem item){
@@ -111,9 +115,15 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         if (item.getAl_level() > 0 ){
             sb.append("  级别: " + item.getAl_level(true) );
         }
-        if (item.getMsg_category() == 1 && item.isIs_cleared()){
-            sb.append("  已关联");
+        if (item.isIs_cleared()){
+            if(item.getSim_perc() == 100){
+                sb.append("  已关联");
+            }else{
+                sb.append("  " + item.getSim_perc(true));
+            }
             view.setBackgroundColor(0xFFE8F5E9);
+        }else{
+            view.setBackgroundColor(0xFFFFFFFF);
         }
         sb.append("\n");
 

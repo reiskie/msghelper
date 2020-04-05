@@ -98,7 +98,7 @@ public class MsgListActivity extends AppCompatActivity implements View.OnClickLi
             bindService(in, fgServiceConn, BIND_AUTO_CREATE);
         }
 
-        getSupportActionBar().setTitle(label + " (" + (itemList.size() -1) + ")");
+        getSupportActionBar().setTitle(label + "(" + (itemList.size() -1) + ")");
 
     }
 

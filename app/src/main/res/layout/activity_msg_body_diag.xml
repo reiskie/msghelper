@@ -39,7 +39,7 @@
                     android:id="@+id/text_body_full"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="24dp" />
+                    android:textSize="20sp" />
                 <!-- android:scrollbars="vertical" -->
 
             </LinearLayout>
@@ -68,7 +68,7 @@
                     android:id="@+id/text_body_full2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="24dp" />
+                    android:textSize="20sp" />
 
             </LinearLayout>
         </LinearLayout>

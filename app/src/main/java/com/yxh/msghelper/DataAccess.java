@@ -136,18 +136,12 @@ public class DataAccess implements Serializable {
         // if user change this config to a earlier time,
         //   we should check whether this new time is earlier than the first one in db.
         //   if so, might want to clear table in db and reload all.
-        long t1 = System.currentTimeMillis() - (1000L*3600*24);
+        long t1 = System.currentTimeMillis() - (1000L*3600*24*2);
         //long t1 = 100; // for test
         return t1;
     }
 
     private static long getDefaultLowerTime(){
-        long t1 = System.currentTimeMillis() - (1000*3600*24);
-        //long t1 = 100; // for test
-        return t1;
-    }
-
-    private static long getTimeBoundaryForRelateMsg(){
         long t1 = System.currentTimeMillis() - (1000*3600*24);
         //long t1 = 100; // for test
         return t1;
@@ -214,6 +208,7 @@ public class DataAccess implements Serializable {
                 msgItem.setBody(c.getString(c.getColumnIndex("body")));
                 msgItem.extractInfo();
                 if (msgItem.getMsg_category() == 1 && msgItem.getAl_level() == 4){ // 清除告警
+                    // 如果 copySMSFromInboxToDB 是被同步调用，这里会慢
                     tryRelateMsg(msgItem);
                 }
                 msgItem.save();
@@ -234,14 +229,17 @@ public class DataAccess implements Serializable {
         return i;
     }
 
-    public  static void tryRelateMsg(MsgItem msgItem){
+    public  static void tryRelateMsg(MsgItem clearItem){
         Log.i(TAG, "tryRelateMsg() execute.");
 
         List<MsgItem> result = null;
+        int max_sim = 0;
+        int max_sim_raw_id = 0;
         int last_min_raw_id = Integer.MAX_VALUE;
+        long earliestTimeForRelate = clearItem.getDate() - (1000L*3600*24);
         while (true){
             result = LitePal
-                    .where("date > " + getTimeBoundaryForRelateMsg()
+                    .where("date > " + earliestTimeForRelate
                             + " and raw_id < " + last_min_raw_id
                             + " and msg_category = 1 "     // 告警
                             + " and al_level in (1,2,3) "  // 主/次/警
@@ -256,22 +254,49 @@ public class DataAccess implements Serializable {
 
             if  (result.size() > 0){
                 for (MsgItem item : result){
-                    if (MsgItem.compareMsgStr(item.getBody(), msgItem.getBody())) {
+                    int sim = MsgItem.compareMsgStr(item.getBody(), clearItem.getBody());
+
+                    if (sim == 100) {
                         item.setIs_cleared(true);
-                        item.setRel_raw_id(msgItem.getRaw_id());
+                        item.setRel_raw_id(clearItem.getRaw_id());
+                        item.setSim_perc(sim);
                         item.save();
-                        msgItem.setRel_raw_id(item.getRaw_id());
+                        clearItem.setRel_raw_id(item.getRaw_id());
+                        clearItem.setSim_perc(sim);
                         break;
                     }else{
                         last_min_raw_id = item.getRaw_id();
+                        if (sim > max_sim){
+                            max_sim = sim;
+                            max_sim_raw_id = item.getRaw_id();
+                        }
                     }
                 }
-                if (result.size() < 20){
+                if (clearItem.getRel_raw_id() > 0 || result.size() < 20){
                     break;
                 }
             }else{
                 break;
             }
+        }
+
+        if (clearItem.getRel_raw_id() == 0 &&  max_sim >= 80){
+            MsgItem item = LitePal
+                    .where("date > " + earliestTimeForRelate
+                            + " and raw_id = " + max_sim_raw_id
+                            + " and msg_category = 1 "     // 告警
+                            + " and al_level in (1,2,3) "  // 主/次/警
+                            + " and is_cleared = 0 "
+                            + " and rel_raw_id = 0 "
+                    )
+                    .findFirst(MsgItem.class);
+
+            item.setIs_cleared(true);
+            item.setRel_raw_id(clearItem.getRaw_id());
+            item.setSim_perc(max_sim);
+            item.save();
+            clearItem.setRel_raw_id(item.getRaw_id());
+            clearItem.setSim_perc(max_sim);
         }
     }
 

@@ -440,7 +440,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                 startActivity(in);
                 break;
             case R.id.text_all:
-                da = new DataAccess();
+                da = new DataAccess(mDataAccess);
                 in = new Intent(this, MsgListActivity.class);
                 in.putExtra("dataAccess", da);
                 in.putExtra("label", "全部");
