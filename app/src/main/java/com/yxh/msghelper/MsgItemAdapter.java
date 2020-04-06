@@ -30,12 +30,12 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
         public ViewHolder(View view) {
             super(view);
             itemView    = view;
-            linearHead = view.findViewById(R.id.linear_head);
-            linearDigest = view.findViewById(R.id.linear_digest);
-            itemDate    = view.findViewById(R.id.msg_date);
-            itemTime = view.findViewById(R.id.msg_time);
-            itemTag     = view.findViewById(R.id.msg_tag);
+            linearHead  = view.findViewById(R.id.linear_head);
+            linearDigest= view.findViewById(R.id.linear_digest);
             itemBody    = view.findViewById(R.id.msg_body);
+            itemDate    = view.findViewById(R.id.msg_date);
+            itemTime    = view.findViewById(R.id.msg_time);
+            itemTag     = view.findViewById(R.id.msg_tag);
         }
     }
 
@@ -88,34 +88,40 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
 
         if (item.getInternal_flag() != 1){
 
+            holder.itemBody.setText(item.getBody());
             holder.itemDate.setText(item.getMon()+"月"+item.getDay()+"日");
             holder.itemTime.setText(item.getTime());
 
             if(item.getMsg_category() == 1 && item.getRel_raw_id() > 0){
-                //列表很长时显示有bug，没设置颜色的行，也会显示颜色
-                //holder.linearHead.setBackgroundColor(0xFFE8F5E9);
-                //holder.linearDigest.setBackgroundColor(0xFFE8F5E9);
-                //holder.itemDate.setBackgroundColor(0xFFE8F5E9);
-                //holder.itemTime.setBackgroundColor(0xFFE8F5E9);
-                //holder.itemTag.setBackgroundColor(0xFFE8F5E9);
-                holder.itemBody.setBackgroundColor(0xFFE8F5E9);
                 if(item.getSim_perc() == 100){
                     holder.itemTag.setText("已关联" );
                 }else{
                     holder.itemTag.setText(item.getSim_perc(true) );
                 }
+
+                //列表很长时显示有bug，没设置颜色的行，也会显示颜色
+                //0405 解决，需要在else里面设置默认颜色，可能系统会复用list item的组件
+                holder.linearHead.setBackgroundColor(0xFFE8F5E9);
+                holder.linearDigest.setBackgroundColor(0xFFE8F5E9);
+                //holder.itemDate.setBackgroundColor(0xFFE8F5E9);
+                //holder.itemTime.setBackgroundColor(0xFFE8F5E9);
+                //holder.itemTag.setBackgroundColor(0xFFE8F5E9);
+                //holder.itemBody.setBackgroundColor(0xFFE8F5E9);
             }else{
-                holder.itemBody.setBackgroundColor(0xFFFFFFFF);
                 holder.itemTag.setText("");
+
+                holder.linearHead.setBackgroundColor(0xFFFFFFFF);
+                holder.linearDigest.setBackgroundColor(0xFFFFFFFF);
+                //holder.itemBody.setBackgroundColor(0xFFFFFFFF);
             }
-
-            holder.itemBody.setText(item.getBody());
-
         }else{
+            holder.itemBody.setText("");
             holder.itemDate.setText("");
             holder.itemTime.setText("");
             holder.itemTag.setText("");
-            holder.itemBody.setText("");
+
+            holder.linearHead.setBackgroundColor(0xFFFFFFFF);
+            holder.linearDigest.setBackgroundColor(0xFFFFFFFF);
             //holder.itemBody.setVisibility(View.GONE);
         }
     }

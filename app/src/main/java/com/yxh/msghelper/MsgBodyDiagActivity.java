@@ -4,10 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,6 +32,21 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
     private String mCopiedText;
     private int lastX;
     private int lastY;
+    private boolean isBinded;
+    private FgService.FgBinder mFgBinder;
+    private ServiceConnection fgServiceConn = new ServiceConnection(){
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG,"ServiceConnection:onServiceDisconnected: from fgService ");
+        }
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG,"ServiceConnection:onServiceConnected:ThreadID = " + Thread.currentThread().getId());
+            isBinded = true;
+            mFgBinder = (FgService.FgBinder)service;
+            mFgBinder.triggerUpdateNotification();
+        }
+    };
     //private Button mBtn;
 
     @Override
@@ -61,6 +80,11 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
             if (!item2.isIs_read()){
                 item2.setIs_read(true);
                 item2.save();
+                // to update notification, have to bind service
+                if (!isBinded){
+                    Intent in=new Intent(this, FgService.class);
+                    bindService(in, fgServiceConn, BIND_AUTO_CREATE);
+                }
             }
         }
     }
@@ -167,6 +191,16 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.i(TAG, "onPause() executed.");
+
+        if (isBinded){
+            //Log.i(TAG,"onPause(), clear updater and unbindService." );
+            //mFgBinder.setGroupUpdater(null);
+            // 连续调用unbindService第二次，就会崩溃
+            unbindService(fgServiceConn);
+            isBinded = false;
+            Log.i(TAG, "onPause(), after unbindService, mFgBinder = " + mFgBinder);
+            mFgBinder = null;
+        }
 
     }
 
