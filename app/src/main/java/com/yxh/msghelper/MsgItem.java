@@ -288,6 +288,8 @@ public class MsgItem extends LitePalSupport implements Serializable {
         String res="";
         if (sim_perc>0 && sim_perc<100)
             res = Integer.valueOf(sim_perc)+"%";
+        else if (sim_perc == 100)
+            res = "已关联";
         return res;
     }
     public void setSim_perc(int sim_perc) {this.sim_perc = sim_perc; }

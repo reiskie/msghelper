@@ -93,16 +93,12 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
             holder.itemTime.setText(item.getTime());
 
             if(item.getMsg_category() == 1 && item.getRel_raw_id() > 0){
-                if(item.getSim_perc() == 100){
-                    holder.itemTag.setText("已关联" );
-                }else{
-                    holder.itemTag.setText(item.getSim_perc(true) );
-                }
+                holder.itemTag.setText(item.getSim_perc(true) );
 
                 //列表很长时显示有bug，没设置颜色的行，也会显示颜色
                 //0405 解决，需要在else里面设置默认颜色，可能系统会复用list item的组件
-                holder.linearHead.setBackgroundColor(0xFFE8F5E9);
-                holder.linearDigest.setBackgroundColor(0xFFE8F5E9);
+                holder.linearHead.setBackgroundColor(MsgApp.getClearedMsgColor());
+                holder.linearDigest.setBackgroundColor(MsgApp.getClearedMsgColor());
                 //holder.itemDate.setBackgroundColor(0xFFE8F5E9);
                 //holder.itemTime.setBackgroundColor(0xFFE8F5E9);
                 //holder.itemTag.setBackgroundColor(0xFFE8F5E9);
@@ -110,8 +106,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
             }else{
                 holder.itemTag.setText("");
 
-                holder.linearHead.setBackgroundColor(0xFFFFFFFF);
-                holder.linearDigest.setBackgroundColor(0xFFFFFFFF);
+                holder.linearHead.setBackgroundColor(MsgApp.getBackgroundColor());
+                holder.linearDigest.setBackgroundColor(MsgApp.getBackgroundColor());
                 //holder.itemBody.setBackgroundColor(0xFFFFFFFF);
             }
         }else{
@@ -120,8 +116,8 @@ public class MsgItemAdapter extends RecyclerView.Adapter<MsgItemAdapter.ViewHold
             holder.itemTime.setText("");
             holder.itemTag.setText("");
 
-            holder.linearHead.setBackgroundColor(0xFFFFFFFF);
-            holder.linearDigest.setBackgroundColor(0xFFFFFFFF);
+            holder.linearHead.setBackgroundColor(MsgApp.getBackgroundColor());
+            holder.linearDigest.setBackgroundColor(MsgApp.getBackgroundColor());
             //holder.itemBody.setVisibility(View.GONE);
         }
     }

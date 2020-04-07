@@ -24,6 +24,8 @@ import android.widget.PopupMenu;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.text.SimpleDateFormat;
 
 public class MsgBodyDiagActivity extends AppCompatActivity {
@@ -61,18 +63,19 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
         //params.height =  WindowManager.LayoutParams.MATCH_PARENT; //对话框高度总是最大值
         //this.getWindow().setAttributes(params);
 
-        initPopupWindow();
+        // popupWindow位置问题未解决，改为设置textview的textIsSelectable属性
+        //initPopupWindow();
 
         MsgItem item = (MsgItem)getIntent().getSerializableExtra("msg_list_item");
-        TextView textBody1 = findViewById(R.id.text_body_full);
-        TextView textHead1 = findViewById(R.id.text_header);
+        TextView textBody1 = (TextView)findViewById(R.id.text_body_full);
+        TextView textHead1 = (TextView)findViewById(R.id.text_header);
         LinearLayout view1 = findViewById(R.id.linear_1);
         fillText(textBody1, textHead1, view1, item);
 
         MsgItem item2 = DataAccess.findRelatedMsg(item);
         if (item2 != null){
-            TextView textBody2 = findViewById(R.id.text_body_full2);
-            TextView textHead2 = findViewById(R.id.text_header2);
+            TextView textBody2 = (TextView)findViewById(R.id.text_body_full2);
+            TextView textHead2 = (TextView)findViewById(R.id.text_header2);
             LinearLayout view2 = findViewById(R.id.linear_2);
             view2.setVisibility(View.VISIBLE);
             fillText(textBody2, textHead2, view2, item2);
@@ -93,42 +96,46 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
 
         textBody.setText(item.getBody());
 
-        textBody.setMovementMethod(ScrollingMovementMethod.getInstance());
-        textBody.setOnLongClickListener(new View.OnLongClickListener(){
-            @Override
-            public boolean onLongClick(View v) {
-                Log.i(TAG, "onLongClick() executed.");
-                //mPopupWindow.showAsDropDown(view); // the popup shown under the textBody, not what I want
-                //mPopupWindow.showAtLocation(mBtn, Gravity.CENTER, 20, 20);  // from internet, this's confused that mBtn is here
-                //mPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
-                mPopupWindow.showAtLocation(v,Gravity.LEFT|Gravity.TOP, lastX, lastY);
-                mCopiedText = ((TextView) v).getText().toString();
-                return false;
-            }
-        });
-        textBody.setOnTouchListener(new View.OnTouchListener(){
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                //Log.i(TAG, "onTouch(): event="+ event.getAction());
-                //Log.i(TAG, "onTouch(): event.x="+ event.getX() + ", event.y=" + event.getY());
-
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        lastX = (int)event.getX();
-                        lastY = (int)event.getY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        break;
-                    default:
-                        break;
-                }
-                //PopupMenu s = new PopupMenu(MsgBodyDiagActivity.this, v);
-                //s.show(); // 不能控制显示位置
-                return false;
-            }
-        });
+//        // 问题未解决，在第二个textView上显示popupWindow时，位置不对，坐标原点仍然是第一个textView的
+//        textBody.setMovementMethod(ScrollingMovementMethod.getInstance());
+//        textBody.setOnLongClickListener(new View.OnLongClickListener(){
+//            @Override
+//            public boolean onLongClick(View v) {
+//                Log.i(TAG, "onLongClick() executed.");
+//                Log.i(TAG, "onLongClick(): v="+ v);
+//
+//                //mPopupWindow.showAsDropDown(view); // the popup shown under the textBody, not what I want
+//                //mPopupWindow.showAtLocation(mBtn, Gravity.CENTER, 20, 20);  // from internet, this's confused that mBtn is here
+//                //mPopupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+//                mPopupWindow.showAtLocation((TextView)v,Gravity.LEFT|Gravity.TOP, lastX, lastY);
+//                mCopiedText = ((TextView) v).getText().toString();
+//                return false;
+//            }
+//        });
+//        textBody.setOnTouchListener(new View.OnTouchListener(){
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                Log.i(TAG, "onTouch(): event="+ event.getAction());
+//                Log.i(TAG, "onTouch(): event.x="+ event.getX() + ", event.y=" + event.getY());
+//                Log.i(TAG, "onTouch(): v="+ v);
+//
+//                switch (event.getAction()) {
+//                    case MotionEvent.ACTION_DOWN:
+//                        lastX = (int)event.getX();
+//                        lastY = (int)event.getY();
+//                        break;
+//                    case MotionEvent.ACTION_MOVE:
+//                        break;
+//                    case MotionEvent.ACTION_UP:
+//                        break;
+//                    default:
+//                        break;
+//                }
+//                //PopupMenu s = new PopupMenu(MsgBodyDiagActivity.this, v);
+//                //s.show(); // 不能控制显示位置
+//                return false;
+//            }
+//        });
 
 
         StringBuilder sb = new StringBuilder() ;
@@ -140,14 +147,12 @@ public class MsgBodyDiagActivity extends AppCompatActivity {
             sb.append("  级别: " + item.getAl_level(true) );
         }
         if (item.isIs_cleared()){
-            if(item.getSim_perc() == 100){
-                sb.append("  已关联");
-            }else{
-                sb.append("  " + item.getSim_perc(true));
-            }
-            view.setBackgroundColor(0xFFE8F5E9);
+            sb.append("  " + item.getSim_perc(true));  // 已关联，或者百分数
+            //view.setBackgroundColor(0xFFE8F5E9);
+            view.setBackgroundColor(MsgApp.getClearedMsgColor());
         }else{
-            view.setBackgroundColor(0xFFFFFFFF);
+            //view.setBackgroundColor(0xFFFFFFFF);
+            view.setBackgroundColor(MsgApp.getBackgroundColor());
         }
         sb.append("\n");
 
