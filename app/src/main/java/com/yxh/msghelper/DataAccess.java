@@ -136,7 +136,7 @@ public class DataAccess implements Serializable {
         // if user change this config to a earlier time,
         //   we should check whether this new time is earlier than the first one in db.
         //   if so, might want to clear table in db and reload all.
-        long t1 = System.currentTimeMillis() - (1000L*3600*24*7);
+        long t1 = System.currentTimeMillis() - (1000L*3600*24*2);
         //long t1 = 100; // for test
         return t1;
     }

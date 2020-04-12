@@ -420,7 +420,7 @@ public class FgService extends Service {
             mSoundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 5);
         }
 
-        mSoundPool.load(this, R.raw.snd1, 1);
+        mSoundPool.load(this, R.raw.alarm2, 1);
         mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
             @Override
             public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
