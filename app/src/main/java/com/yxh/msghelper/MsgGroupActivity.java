@@ -117,7 +117,7 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
         Intent in = null;
         switch (item.getItemId()){
             case R.id.sound:
-                if (mFgBinder.toggleMute()){
+                if (UtilSound.toggleMute()){
                     item.setIcon(R.drawable.ic_volume_off_white);
                 }else{
                     item.setIcon(R.drawable.ic_volume_up_white);
@@ -135,6 +135,10 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
                     DataAccess.copySMSFromInboxToDB();
                     refreshFixedGroup();
                 }
+                break;
+            case R.id.settings:
+                in = new Intent(this, ActivitySetting.class);
+                startActivity(in);
                 break;
             case R.id.manual:
                 in = new Intent(this, ActivityAbout.class);

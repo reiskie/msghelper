@@ -39,9 +39,6 @@ public class FgService extends Service {
     private SMSContentObserver smsContentObserver;
     private FgBinder mBinder = this.new FgBinder();
     private NotificationValuesHolder lastHolder;
-    private SoundPool mSoundPool;
-    private boolean isSoundLoaded;
-    private boolean isMute;
     private Handler mHandler = new Handler(new Handler.Callback() {
         public boolean  handleMessage(Message msg) {
             Log.i(TAG,"Handler:handleMessage():ThreadID = " + Thread.currentThread().getId());
@@ -65,10 +62,6 @@ public class FgService extends Service {
     });
 
     class FgBinder extends Binder {
-        public boolean toggleMute(){
-            FgService.this.isMute = !FgService.this.isMute;
-            return FgService.this.isMute;
-        }
 
         public void setGroupUpdater(MsgGroupActivity.ActivityGroupUpdater updater){
             groupUpdater = updater;
@@ -98,7 +91,7 @@ public class FgService extends Service {
         mDataAccess = new DataAccess();
         startForeground(1, getNotification("信息监控中..."));
         registerContentObservers();
-        initSound();
+        UtilSound.initSound();
     }
 
     private void registerContentObservers(){
@@ -175,9 +168,7 @@ public class FgService extends Service {
         }
         if (lastHolder == null && holder.getBadgeMajor() > 0
                 || lastHolder != null && holder.isMajorIncreased(lastHolder)){
-            if (!isMute && checkTimeForSound()){
-                playSound();
-            }
+            UtilSound.playSound(true);
         }
         lastHolder = holder;
     }
@@ -218,17 +209,6 @@ public class FgService extends Service {
         return builder.build();
     }
 
-    private boolean checkTimeForSound(){
-        Log.i(TAG,"checkTimeForSound: executed.");
-        boolean res = true;
-        SimpleDateFormat df = new SimpleDateFormat("HHmm");
-        int nowtime = Integer.parseInt(df.format(new Date()));
-        if (nowtime > 2300 || nowtime < 800){
-            res = false;
-        }
-        return res;
-    }
-
     public void triggerReadSmsAsync(){
         smsContentObserver.triggerReadSmsAsync();
     }
@@ -251,11 +231,8 @@ public class FgService extends Service {
             getContentResolver().unregisterContentObserver(smsContentObserver);
             smsContentObserver = null;
         }
-        if (mSoundPool != null){
-            mSoundPool.release();
-            mSoundPool=null;
-            isSoundLoaded = false;
-        }
+
+        UtilSound.cleanup();
     }
 
     @Override
@@ -404,67 +381,4 @@ public class FgService extends Service {
         }
     }
 
-
-    private void initSound(){
-        Log.i(TAG,"initSound() executed.");
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
-            attrBuilder.setLegacyStreamType(AudioManager.STREAM_MUSIC);
-            SoundPool.Builder builder = new SoundPool.Builder();
-            builder.setAudioAttributes(attrBuilder.build());
-            builder.setMaxStreams(3); //传入音频的最大数量
-            mSoundPool = builder.build();
-        } else {
-            //第一个参数是可以支持的声音数量，第二个是声音类型，第三个是声音品质
-            mSoundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 5);
-        }
-
-        mSoundPool.load(this, R.raw.alarm2, 1);
-        mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-            @Override
-            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-                isSoundLoaded = true;
-            }
-        });
-    }
-
-    public void playSound() {
-
-        Log.i(TAG, "playSound(): mSoundPool="+mSoundPool +", isSoundLoaded="+isSoundLoaded);
-
-        if (mSoundPool == null || !isSoundLoaded){
-            return;
-        }
-
-        // 待优化 避免集中并发多次播放声音
-        // 提供开关，关闭声音播放
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                //当前音量
-                int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                //设置为最大值
-                int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
-                //第一个参数id，即传入池中的顺序，第二个和第三个参数为左右声道，第四个参数为优先级
-                //第五个是否循环播放，0不循环，-1循环
-                //第六个参数为播放比率，范围0.5到2，通常为1表示正常播放
-                mSoundPool.play(1, 1, 1, 0, 0, 1);
-
-                try{
-                        Thread.sleep(600);
-                    }catch (InterruptedException e){
-                        e.printStackTrace();
-                    }
-
-                // 恢复原值, 播放完成时才恢复，如何知道？A: 无法知道
-                // 可以通过MediaPlayer获取duration，然后按时间等待
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
-
-            }
-        }).start();
-    }
 }

@@ -23,6 +23,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".ActivitySetting"
+            android:launchMode="singleTask"
+            />
         <activity
             android:name=".ActivityAbout"
             android:launchMode="singleTask"

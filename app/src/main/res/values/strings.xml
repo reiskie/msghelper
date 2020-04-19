@@ -109,7 +109,7 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
 
-    <string name="version">信息助手 版本: 0.4</string>
+    <string name="version">信息助手 版本: 0.5</string>
     <string name="about">
         "手机权限使用列表：\n"
         "1. 读取/接收短信\n"
@@ -124,6 +124,8 @@
         "4. hanlp\n\n"
 
         "版本更新记录：\n"
+        "0.5 开发中 \n"
+        "    调节音量\n"
         "0.4 2020-04-07 \n"
         "    声音提醒\n"
         "    概览页时间范围选择\n"
