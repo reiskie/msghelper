@@ -189,23 +189,5 @@ public class UtilSimHash {
         return res;
     }
 
-    // 计算相似度前
-    // 1, 去掉预期内的差异内容，包括：
-    //    a. “发生时间”后面的内容，包括了时间戳
-    //    b. 告警级别，如：主要告警、清除告警
-    // 2, 去掉肯定一样的部分，例如: 民生银行、生产系统
-    private static String preFormat(String content) {
-
-        int pos1 = content.indexOf("发生时间");
-        if (pos1 >0 ) {
-            content = content.substring(0, pos1);
-        }
-
-        content = content.replaceAll("(主要告警|次要告警|警告告警|清除告警|告警解除)", "");
-
-        content = content.replaceAll("(【民生银行】|生产系统)", "");
-
-        return content;
-    }
 }
 

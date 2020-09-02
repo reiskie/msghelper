@@ -449,17 +449,22 @@ public class MsgItem extends LitePalSupport implements Serializable {
     private static boolean checkAlphaOps(String strAlert, String strClear) {
 
         Log.i(TAG,"checkAlphaOps: AlphaOps is found.");
-        //【民生银行】[新]警告告警[AlphaOps 告警]【次要告警】【PE系统-F5_PE系统】，异常点开始时间：2020/04/03 10:00。异常指标：【响应时间0.41s|高于0.38及以下范围】。
-        //【民生银行】[新]清除告警[AlphaOps 告警]【告警解除】【PE系统-F5_PE系统】，【响应时间高于正常值】的告警已解除，
+        //【地球银行】[新]警告告警[AlphaOps 告警]【次要告警】【PE系统-F5_PE系统】，异常点开始时间：2020/04/03 10:00。异常指标：【响应时间0.41s|高于0.38及以下范围】。
+        //【地球银行】[新]清除告警[AlphaOps 告警]【告警解除】【PE系统-F5_PE系统】，【响应时间高于正常值】的告警已解除，
 
-        //【民生银行】[NEW]警告告警[AlphaOps 告警]【次要告警】【NPS系统-cardStatusCheck服务】，异常点开始时间：2020/03/25 18:43。异常指标：【交易量119笔|高于正常范围0-47】。
-        //【民生银行】[NEW]清除告警[AlphaOps 告警]【告警解除】【NPS系统-cardStatusCheck服务】，【交易量高于正常值】的告警已解除，
+        //【地球银行】[NEW]警告告警[AlphaOps 告警]【次要告警】【NPS系统-cardStatusCheck服务】，异常点开始时间：2020/03/25 18:43。异常指标：【交易量119笔|高于正常范围0-47】。
+        //【地球银行】[NEW]清除告警[AlphaOps 告警]【告警解除】【NPS系统-cardStatusCheck服务】，【交易量高于正常值】的告警已解除，
+
+        //【地球银行】[新]警告告警[AlphaOps 告警]【主要告警】【NPS系统-queryTransDetailForDBank服务】，异常点开始时间：2020/09/02 15:39。异常指标：【交易量，值：1675笔，高于正常范围563-990】。关注指标当前值：【交易量1675笔】，【成功率100.00%】，【响应时间0.17s】，【响应率100.00%】。发生时间09/02/2020_15:45:15,[来自天思AlphaOps 智能运维]
+        //【地球银行】[新]清除告警[AlphaOps 告警]【告警解除】【NPS系统-queryTransDetailForDBank服务】，【异常点开始时间：2020-09-02 15:39:00;交易量，值：1675笔，高于正常范围563-99】的告警已解除，关注指标当前值：【交易量793笔】，【成功率100.00%】，【响应时间0.28s】，【响应率100.00%】，解除时间 2020/09/02 15:48。发生时间09/02/2020_15:51:56,[来自天思AlphaOps 智能运维]
+
 
         boolean result = false;
         String beginAlert = null;
         String beginClear = null;
         String termAlert = null;
         String termClear = null;
+        String termClearForFind = null;
 
         String body = strAlert.replaceAll("(主要告警|次要告警|警告告警|清除告警|告警解除)", "");
         beginAlert = body.substring(0, body.indexOf("】，异常点"));
@@ -470,14 +475,17 @@ public class MsgItem extends LitePalSupport implements Serializable {
         beginClear = body.substring(0, body.indexOf("】，【"));
         pos = body.indexOf("】，【");
         termClear  = body.substring(pos + 3, pos +3 + 3);
+        termClearForFind = body.substring(beginClear.length(), body.indexOf("关注指标当前值："));
 
         Log.i(TAG,"beginAlert=" + beginAlert);
         Log.i(TAG,"beginClear=" + beginClear);
         Log.i(TAG,"termAlert =" + termAlert);
         Log.i(TAG,"termClear =" + termClear);
+        Log.i(TAG,"termClearForFind =" + termClearForFind);
 
         if (beginAlert != null && termAlert  != null &&
-                beginAlert.equals(beginClear) && termAlert.equals(termClear)) {
+                beginAlert.equals(beginClear) &&
+                (termAlert.equals(termClear) || termClearForFind.indexOf(termAlert) > -1)) {
             Log.i(TAG,"$$$***### AlphaOps 比对成功!");
             result = true;
         }
