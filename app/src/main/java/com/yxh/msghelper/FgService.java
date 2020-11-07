@@ -168,7 +168,7 @@ public class FgService extends Service {
         }
         if (lastHolder == null && holder.getBadgeMajor() > 0
                 || lastHolder != null && holder.isMajorIncreased(lastHolder)){
-            UtilSound.playSound(true);
+            UtilSound.play(true);
         }
         lastHolder = holder;
     }
