@@ -22,9 +22,6 @@ import static java.lang.Thread.sleep;
 
 public class UtilSound {
     private static final String TAG = "UtilSound";
-    private static final String FLAG = "SELF";
-    //private static final String FLAG = "USER";
-
 
     private static SoundPool mSoundPool;
     private static boolean isSoundLoaded;
@@ -206,7 +203,7 @@ public class UtilSound {
             @Override
             public void run() {
 
-                if (FLAG.equals("SELF")){
+                if (MsgApp.getFlagUser() == MsgApp.FLAG_USER_SELF){
                     playSound();
                 }else{
                     playRing();
