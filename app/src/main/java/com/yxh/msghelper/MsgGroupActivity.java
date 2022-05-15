@@ -356,14 +356,14 @@ public class MsgGroupActivity extends AppCompatActivity implements View.OnClickL
 
         // have enough permissions
         if (permissionNeeded.size() == 0) {
-            // 服务中注册contentObserver，需要权限
+            // 服务中注册contentObserver读取短信，需要权限
             Intent in = new Intent(this, FgService.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 this.startForegroundService(in);
             } else {
                 startService(in);
             }
-            // 到这里说明第一次获得权限，onResume可能已经结束，但其中没有bind（因为没权限）
+            // 到这里说明第一次获得权限，onResume 可能已经结束，但其中没有bind（因为没权限）
             bindService(in, fgServiceConn, BIND_AUTO_CREATE);
         }
 

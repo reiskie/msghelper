@@ -175,7 +175,7 @@ public class DataAccess implements Serializable {
         //String[] arr = {"xxx", "xxxx","10086", "+8613810745542", "+8613810105361"};
         //String[] arr = {"xxx", "xxx","xxx", "+8613810745542", "+8613810105361"};
         //String[] arr = {"10016", "1065510198","106559999", "10010", "13810105361"};
-        String[] arr = {"106980095568911", "106980095568","+8613810105361", "xxx", "xxx"};
+        String[] arr = {"106980095568911", "106980095568","xxxx", "106980095568025", "13810105361"};
 
         List<String> argsList = new ArrayList<String>(Arrays.asList(arr));
 
@@ -364,40 +364,25 @@ public class DataAccess implements Serializable {
     // no groupby in LitePal
     // SQLiteDatabase.query() support groupBy and selectionArgs[], but still need to use cursor
     public Map<String, Integer>  aggregateMsgfromDB(String aggregate_col){
-        HashMap<String, Integer> result = new HashMap<String, Integer>();
-        Log.i(TAG,"aggregateMsgfromDB(), aggregate_cod=" + aggregate_col);
-
-        String sqlstr = new String("select ");
-        sqlstr = sqlstr + aggregate_col + ", count(1) from msgitem where " + this.getPredicateString()
-                + " group by " + aggregate_col + " order by " + aggregate_col;
-        Log.i(TAG,"aggregateMsgfromDB(), sqlstr=" + sqlstr);
-
-        Cursor c = LitePal.findBySQL(sqlstr);
-        if (c != null){
-            if(c.moveToFirst()) {
-                do {
-                    String col = c.getString(0);
-                    int cnt = c.getInt(1);
-                    result.put(col, cnt);
-                } while (c.moveToNext());
-            }
-            c.close();
-        }
-
-        Log.i(TAG,"aggregateMsgfromDB(), result=" + result);
-
+        Map<String, Integer> result = null;
+        result = aggregateMsg(aggregate_col, " " );
         return result;
     }
 
     public Map<String, Integer>  aggregateMsgfromDB(String aggregate_col, String condition){
+        Map<String, Integer> result = null;
+        result = aggregateMsg(aggregate_col, " and " + condition);
+        return result;
+    }
+
+    private Map<String, Integer>  aggregateMsg(String aggregate_col, String condition){
         HashMap<String, Integer> result = new HashMap<String, Integer>();
-        Log.i(TAG,"aggregateMsgfromDB(), aggregate_cod=" + aggregate_col + ", cond=" + condition);
+        Log.i(TAG,"aggregateMsg(), aggregate_cod=" + aggregate_col + ", cond=" + condition);
 
         String sqlstr = new String("select ");
-        sqlstr = sqlstr + aggregate_col + ", count(1) from msgitem where "
-                + this.getPredicateString() + " and " + condition
+        sqlstr = sqlstr + aggregate_col + ", count(1) from msgitem where " + this.getPredicateString() + " " + condition
                 + " group by " + aggregate_col + " order by " + aggregate_col;
-        Log.i(TAG,"aggregateMsgfromDB(), sqlstr=" + sqlstr);
+        Log.i(TAG,"aggregateMsg(), sqlstr=" + sqlstr);
 
         Cursor c = LitePal.findBySQL(sqlstr);
         if (c != null){
@@ -411,10 +396,10 @@ public class DataAccess implements Serializable {
             c.close();
         }
 
-        Log.i(TAG,"aggregateMsgfromDB(), result=" + result);
+        Log.i(TAG,"aggregateMsg(), result=" + result);
 
         return result;
     }
 
-
 }
+

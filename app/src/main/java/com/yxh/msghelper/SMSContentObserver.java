@@ -63,6 +63,11 @@ public class SMSContentObserver extends ContentObserver {
                  return;
         }
 
+        if (true){
+            return;
+        }
+
+        // bellow is testing code
         Uri inboxUri = Uri.parse("content://sms/inbox") ;
         int i=0;
         Cursor c = mContext.getContentResolver()
