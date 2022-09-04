@@ -11,8 +11,8 @@ public class MsgApp extends Application {
     private static int clearedMsgColor = 0xFFE8F5E9;
 
     // FLAG_USER indicate the user who the current build is working for.
-    public static final int FLAG_USER_SELF = 1;
-    public static final int FLAG_USER_INTERNAL = 2;
+    public static final int FLAG_USER_SELF = 1;  // play fixed sound resource
+    public static final int FLAG_USER_INTERNAL = 2;  // play ringtone of notification specified by user
     public static final int FLAG_USER_ALL = 3;
     public static int getFlagUser(){return FLAG_USER_INTERNAL;}
 
